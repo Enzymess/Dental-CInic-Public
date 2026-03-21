@@ -1,71 +1,20 @@
 /* =========================================================
    ADMIN PANEL FUNCTIONS
    ========================================================= */
-/* =========================================================
-   VERSION FEATURE MAP
-   ========================================================= */
-const VERSION_FEATURES = {
-  1: { nav: ['navPatients'],                                          modal: ['pmViewDentalChart','pmViewTreatmentRecords','pmPrint'],                                              hide: ['dashFinRow'] },
-  2: { nav: ['navDashboard','navPatients','navBilling'],               modal: ['pmViewDentalChart','pmViewTreatmentRecords','pmPrint','pmViewPrescriptions','pmViewPatientImages'], hide: [] },
-  3: { nav: ['navDashboard','navSchedule','navPatients'],              modal: ['pmViewDentalChart','pmViewTreatmentRecords','pmPrint','pmViewPrescriptions','pmViewPatientImages'], hide: ['dashFinRow'] },
-  4: { nav: ['navDashboard','navSchedule','navPatients','navBilling'], modal: ['pmViewDentalChart','pmViewTreatmentRecords','pmPrint','pmViewPrescriptions','pmViewPatientImages'], hide: [] },
-};
-
-function applyVersionFeatures(version) {
-  const v = parseInt(version) || 4;
-  const features = VERSION_FEATURES[v] || VERSION_FEATURES[4];
-
-  // Nav buttons — show only allowed ones
-  const allNav = ['navDashboard','navSchedule','navPatients','navBilling'];
-  allNav.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.display = features.nav.includes(id) ? '' : 'none';
-  });
-
-  // Patient modal buttons — show only allowed ones
-  const allModal = ['pmViewDentalChart','pmViewTreatmentRecords','pmPrint','pmViewPrescriptions','pmViewPatientImages'];
-  allModal.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.display = features.modal.includes(id) ? '' : 'none';
-  });
-
-  // Hide/show extra dashboard elements (e.g. financial summary)
-  const allHideable = ['dashFinRow'];
-  allHideable.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.display = features.hide.includes(id) ? 'none' : '';
-  });
-
-  // If current active nav is hidden, switch to first visible one
-  const activeNav = document.querySelector('.dash-nav-btn.active');
-  if (activeNav && activeNav.style.display === 'none') {
-    const firstVisible = document.querySelector('.dash-nav-btn:not([style*="display: none"])');
-    firstVisible?.click();
-  }
-}
-
 async function showAdminPanel() {
-  // Restore token from session if page was refreshed
   if (!adminToken) adminToken = sessionStorage.getItem('pdaToken')
   adminPanel.classList.remove('hidden');
   adminPanel.setAttribute('aria-hidden', 'false');
   form.style.display = 'none';
 
-  // Show logged-in dentist name
-  const dn = sessionStorage.getItem('pdaDentistName') || '';
-  const rl = sessionStorage.getItem('pdaRole') || 'admin';
-  const vr = parseInt(sessionStorage.getItem('pdaVersion')) || 4;
+  // Show logged-in dentist/admin name in sidebar
+  const dn     = sessionStorage.getItem('pdaDentistName') || '';
+  const rl     = sessionStorage.getItem('pdaRole') || 'admin';
   const banner = document.getElementById('adminLoggedInAs');
   if (banner) {
     banner.textContent = dn ? `Logged in as: ${dn}` : 'Logged in as: Admin';
     banner.className   = `admin-logged-as ${rl}`;
   }
-
-  // Apply version-based feature visibility
-  applyVersionFeatures(vr);
 
   await loadPatients();
   startAppointmentsRefresh();
@@ -115,7 +64,8 @@ function groupPatients(entries) {
       if (!existing.folderName && e._patientFolder) {
         existing.folderName = e._patientFolder;
       }
-      if (!existing.photoPath && e.photoPath) {
+      // Always take the most recent non-null photoPath (not just when currently null)
+      if (e.photoPath) {
         existing.photoPath = e.photoPath;
       }
     }
@@ -155,10 +105,12 @@ function renderPatients(groups) {
     
     const hasPhoto = group.photoPath ? '' : 'hidden';
     const fullName = `${group.lastName}, ${group.firstName}${group.middleName ? ' ' + group.middleName : ''}`;
+    // Cache-bust the thumbnail so the latest photo always shows in the list
+    const photoSrc = group.photoPath ? group.photoPath + '?t=' + Date.now() : '';
     
     div.innerHTML = `
       <div class="patient-head">
-        <img class="patient-photo ${hasPhoto}" src="${group.photoPath || ''}" alt="Patient photo" />
+        <img class="patient-photo ${hasPhoto}" src="${photoSrc}" alt="Patient photo" />
         <div class="patient-meta">${fullName} — ${group.birthdate || 'No birthdate'} (${group.appointments.length} visit${group.appointments.length !== 1 ? 's' : ''})</div>
       </div>
     `;

@@ -1333,11 +1333,17 @@ input[type="radio"] {
   opacity: 1;
 }
 
-.pm-photo-wrapper input[type="file"] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
+.pm-photo-wrapper {
+  transition: transform 0.15s ease;
+}
+
+.pm-photo-wrapper:active {
+  transform: scale(0.96);
+}
+
+.pm-photo img,
+.pm-photo-overlay {
+  pointer-events: none;
 }
 
 .pm-title-group {
@@ -2133,6 +2139,21 @@ input[type="radio"] {
   white-space: nowrap;
 }
 
+.tr-card-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
 .tr-tooth-badge {
   display: inline-block;
   padding: 2px 9px;
@@ -2736,6 +2757,7 @@ input[type="radio"] {
   padding: 20px;
   overflow-y: auto;
   flex: 1;
+  scrollbar-gutter: stable;
 }
 
 .tr-form-grid {
@@ -2743,6 +2765,28 @@ input[type="radio"] {
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-bottom: 16px;
+}
+
+/* Prevent native time-picker scroll widget from causing layout overflow */
+.tr-form-grid input[type="time"],
+#trForm input[type="time"],
+#addTempPatientForm input[type="time"],
+#rescheduleForm input[type="time"] {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Hide the spin buttons that cause the scroll overflow glitch */
+.tr-form-grid input[type="time"]::-webkit-inner-spin-button,
+.tr-form-grid input[type="time"]::-webkit-calendar-picker-indicator,
+#trForm input[type="time"]::-webkit-inner-spin-button,
+#trForm input[type="time"]::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .tr-form-grid label {
@@ -4095,6 +4139,20 @@ input[type="radio"] {
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
+}
+
+.appt-time-chip {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 7px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
 }
 
 .appt-next {
@@ -6845,92 +6903,6 @@ input[type="radio"] {
   .pi-tag-custom-add { width: 100%; }
 }
 
-
-/* =========================================================
-   DENTIST LOGIN SCREEN
-   ========================================================= */
-.dls-overlay {
-  position: fixed; inset: 0; z-index: 9999;
-  background: linear-gradient(135deg, #0b3d6b 0%, #0b5ea8 60%, #0b9adf 100%);
-  align-items: center; justify-content: center; padding: 20px;
-}
-.dls-card {
-  background: #fff; border-radius: 20px; padding: 44px 40px 36px;
-  width: 100%; max-width: 400px; box-shadow: 0 32px 80px rgba(0,0,0,0.3);
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-}
-.dls-logo {
-  width: 60px; height: 60px; background: linear-gradient(135deg, #0b5ea8, #0b9adf);
-  border-radius: 18px; display: flex; align-items: center; justify-content: center;
-  font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px;
-  box-shadow: 0 6px 20px rgba(11,94,168,0.35); margin-bottom: 12px;
-}
-.dls-title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0; text-align: center; }
-.dls-sub   { font-size: 13.5px; color: #64748b; margin: 2px 0 24px; text-align: center; }
-.dls-form  { width: 100%; display: flex; flex-direction: column; gap: 14px; }
-.dls-field { display: flex; flex-direction: column; gap: 5px; }
-.dls-label { font-size: 12px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; }
-.dls-input {
-  width: 100%; padding: 11px 14px; border: 2px solid #e2e8f0; border-radius: 10px;
-  font-size: 14px; font-family: inherit; color: #0f172a; background: #f8fafc;
-  outline: none; box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s;
-}
-.dls-input:focus { border-color: #0b5ea8; background: #fff; box-shadow: 0 0 0 3px rgba(11,94,168,0.12); }
-.dls-error { font-size: 13px; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 8px 12px; text-align: center; }
-.dls-btn {
-  width: 100%; padding: 13px; background: linear-gradient(135deg, #0b5ea8, #0b9adf);
-  color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
-  cursor: pointer; font-family: inherit; margin-top: 4px;
-  box-shadow: 0 4px 14px rgba(11,94,168,0.3); transition: opacity 0.15s, transform 0.15s;
-}
-.dls-btn:hover    { opacity: 0.92; transform: translateY(-1px); }
-.dls-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-.dls-hint { font-size: 12px; color: #94a3b8; margin-top: 16px; text-align: center; }
-.dentist-form-banner {
-  display: flex; align-items: center; gap: 10px; padding: 10px 18px;
-  background: linear-gradient(135deg, #eff6ff, #f0f9ff);
-  border: 1.5px solid #bfdbfe; border-radius: 12px; margin-bottom: 14px; flex-wrap: wrap;
-}
-.dfb-label { font-size: 12px; font-weight: 600; color: #64748b; }
-.dfb-name  { font-size: 14px; font-weight: 800; color: #0b5ea8; flex: 1; }
-.dfb-signout { padding: 4px 12px; background: #fff; border: 1.5px solid #bfdbfe; border-radius: 8px; font-size: 12px; font-weight: 600; color: #0b5ea8; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-.dfb-signout:hover { background: #eff6ff; border-color: #0b5ea8; }
-.admin-logged-as { font-size: 12px; font-weight: 600; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; text-align: center; }
-.admin-logged-as.dentist { background: #eff6ff; color: #0b5ea8; border: 1px solid #bfdbfe; }
-.admin-logged-as.admin   { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-@media (max-width: 480px) { .dls-card { padding: 32px 20px 28px; } .dls-title { font-size: 19px; } }
-
-
-/* =========================================================
-   APPOINTMENT TIME + DENTIST BADGE
-   ========================================================= */
-.appt-clock {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  color: #0b5ea8;
-  margin-top: 2px;
-}
-
-.appt-dentist {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  color: #0b5ea8;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 20px;
-  padding: 1px 8px;
-  margin-top: 2px;
-}
-
-/* Treatment record card — time inline with date */
-.tr-card-date {
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 600;
-}
-
 /* =========================================================
    GLOBAL RESPONSIVE FIXES
    ========================================================= */
@@ -7702,4 +7674,77 @@ input[type="radio"] {
   background: linear-gradient(135deg, #f59e0b, #d97706) !important;
   color: #fff !important;
   font-weight: 700 !important;
+}
+/* =========================================================
+   DENTIST LOGIN SCREEN
+   ========================================================= */
+.dls-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, #0b3d6b 0%, #0b5ea8 60%, #0b9adf 100%);
+  align-items: center; justify-content: center; padding: 20px;
+}
+.dls-card {
+  background: #fff; border-radius: 20px; padding: 44px 40px 36px;
+  width: 100%; max-width: 400px; box-shadow: 0 32px 80px rgba(0,0,0,0.3);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.dls-logo {
+  width: 60px; height: 60px;
+  background: linear-gradient(135deg, #0b5ea8, #0b9adf);
+  border-radius: 18px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px;
+  box-shadow: 0 6px 20px rgba(11,94,168,0.35); margin-bottom: 12px;
+}
+.dls-title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0; text-align: center; }
+.dls-sub   { font-size: 13.5px; color: #64748b; margin: 2px 0 24px; text-align: center; }
+.dls-form  { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+.dls-field { display: flex; flex-direction: column; gap: 5px; }
+.dls-label { font-size: 12px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; }
+.dls-input {
+  width: 100%; padding: 11px 14px; border: 2px solid #e2e8f0; border-radius: 10px;
+  font-size: 14px; font-family: inherit; color: #0f172a; background: #f8fafc;
+  outline: none; box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.dls-input:focus { border-color: #0b5ea8; background: #fff; box-shadow: 0 0 0 3px rgba(11,94,168,0.12); }
+.dls-error {
+  font-size: 13px; color: #dc2626; background: #fef2f2;
+  border: 1px solid #fecaca; border-radius: 8px; padding: 8px 12px; text-align: center;
+}
+.dls-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, #0b5ea8, #0b9adf);
+  color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit; margin-top: 4px;
+  box-shadow: 0 4px 14px rgba(11,94,168,0.3); transition: opacity 0.15s, transform 0.15s;
+}
+.dls-btn:hover    { opacity: 0.92; transform: translateY(-1px); }
+.dls-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.dls-hint { font-size: 12px; color: #94a3b8; margin-top: 16px; text-align: center; }
+
+/* ── Dentist banner above patient form ── */
+.dentist-form-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 18px; background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+  border: 1.5px solid #bfdbfe; border-radius: 12px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.dfb-label { font-size: 12px; font-weight: 600; color: #64748b; }
+.dfb-name  { font-size: 14px; font-weight: 800; color: #0b5ea8; flex: 1; }
+.dfb-signout {
+  padding: 4px 12px; background: #fff; border: 1.5px solid #bfdbfe;
+  border-radius: 8px; font-size: 12px; font-weight: 600; color: #0b5ea8;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.dfb-signout:hover { background: #eff6ff; border-color: #0b5ea8; }
+
+/* ── Admin sidebar logged-in badge ── */
+.admin-logged-as {
+  font-size: 12px; font-weight: 600; padding: 8px 12px;
+  border-radius: 8px; margin-bottom: 8px; text-align: center;
+}
+.admin-logged-as.dentist { background: #eff6ff; color: #0b5ea8; border: 1px solid #bfdbfe; }
+.admin-logged-as.admin   { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+@media (max-width: 480px) {
+  .dls-card  { padding: 32px 20px 28px; }
+  .dls-title { font-size: 19px; }
 }

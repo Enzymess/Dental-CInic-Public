@@ -41,6 +41,7 @@ function initDentistLoginScreen() {
   const form    = document.getElementById('dentalForm');
   if (!screen || !loginFm || !form) return;
 
+  // Hide form until dentist signs in
   form.style.display   = 'none';
   screen.style.display = 'flex';
 
@@ -52,21 +53,22 @@ function initDentistLoginScreen() {
 
     const username = document.getElementById('dlsUsername').value.trim();
     const password = document.getElementById('dlsPassword').value;
+
     if (!username || !password) {
-      errEl.textContent = 'Please enter your username and password.';
+      errEl.textContent   = 'Please enter your username and password.';
       errEl.style.display = 'block';
       return;
     }
 
     const btn = loginFm.querySelector('.dls-btn');
-    btn.disabled = true;
+    btn.disabled    = true;
     btn.textContent = 'Signing in…';
 
     try {
       const res  = await fetch('/login', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body:    JSON.stringify({ username, password })
       });
       const body = await res.json();
 
@@ -76,6 +78,7 @@ function initDentistLoginScreen() {
         return;
       }
 
+      // Store dentist session
       selectedDentistId      = body.dentistId   || null;
       selectedDentistName    = body.dentistName || username;
       selectedDentistRole    = body.role        || 'dentist';
@@ -252,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sessionStorage.setItem('pdaRole',        body.role        || 'admin')
       sessionStorage.setItem('pdaVersion',     body.version     || 4)
       hideLoginModal();
+      await loadClinicConfig();
       showAdminPanel();
     } catch (err) {
       console.error(err);
@@ -297,6 +301,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   createBackup?.addEventListener('click', createBackupArchive);
+
+  // Clinic Config button
+  document.getElementById('clinicConfigBtn')?.addEventListener('click', openClinicConfigModal);
 
   // DEBUG BUTTON
   const debugBtn = document.createElement('button');
@@ -420,18 +427,26 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('change', (e) => {
     if (e.target.id === 'pmPhotoInput') {
       const file = e.target.files[0];
-      if (file) {
-        if (pmPhoto) {
-          const tempUrl = URL.createObjectURL(file);
-          pmPhoto.src = tempUrl;
-          pmPhoto.style.display = 'block';
-          pmPhoto.style.width = '100%';
-          pmPhoto.style.height = '100%';
-          pmPhoto.style.objectFit = 'cover';
-          pmPhoto.style.borderRadius = '50%';
-        }
-        changePatientPhoto(file);
+      if (!file) return;
+
+      // Reject non-JPG files before uploading
+      if (!/^image\/jpe?g$/i.test(file.type)) {
+        alert('Only JPG/JPEG files are allowed for patient photos.');
+        e.target.value = '';
+        return;
       }
+
+      // Show preview immediately while upload happens in background
+      if (pmPhoto) {
+        const tempUrl = URL.createObjectURL(file);
+        pmPhoto.src = tempUrl;
+        pmPhoto.style.display = 'block';
+        pmPhoto.style.width = '100%';
+        pmPhoto.style.height = '100%';
+        pmPhoto.style.objectFit = 'cover';
+        pmPhoto.style.borderRadius = '50%';
+      }
+      changePatientPhoto(file);
     }
   });
   
@@ -492,6 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const payload = collectFormData(form);
     payload._submittedAt = new Date().toISOString();
+    // Attach dentist to patient record
     if (selectedDentistId)   payload.attendingDentistId = selectedDentistId;
     if (selectedDentistName) payload.attendingDentist   = selectedDentistName;
 

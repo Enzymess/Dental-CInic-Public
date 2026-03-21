@@ -28,6 +28,7 @@ const { promises: fs } = require('fs')
 const path     = require('path')
 const multer   = require('multer')
 const { requireAuth } = require('../middleware/auth')
+const { activeTokens } = require('../config')
 const { patientsDir } = require('../config')
 const { getAllPatients, readAppointments, writeAppointments, getPatientFolder } = require('../utils/patient-data')
 const { initializePatientTeeth } = require('../utils/teeth')
@@ -46,9 +47,18 @@ const { makeId, parseFormDataFields } = require('../utils/helpers')
 router.get('/patients', requireAuth, async (req, res) => {
   try {
     const patients = await getAllPatients()
+
+    // Get dentistId from token — dentists only see their own patients
+    const authHdr = req.headers['authorization'] || ''
+    const tkn     = authHdr.replace(/^Bearer /i, '').trim()
+    const td      = activeTokens.get(tkn) || {}
+    const filterDentistId = td.dentistId || null
+
     const flattened = []
     patients.forEach(patient => {
       patient.appointments.forEach(appt => {
+        // Strict filter: dentist only sees appointments assigned to them
+        if (filterDentistId && appt.attendingDentistId !== filterDentistId) return
         flattened.push({
           ...appt,
           lastName:       patient.lastName,
@@ -106,15 +116,24 @@ router.get('/patients-list', requireAuth, async (req, res) => {
  * Optional file: Patient photo (multipart/form-data)
  * Response: JSON { ok: true, id: appointmentId }
  */
-router.post('/submit', uploadFormPhoto.single('photo'), async (req, res) => {
+router.post('/submit', requireAuth, uploadFormPhoto.single('photo'), async (req, res) => {
   try {
-    const entry = req.file ? parseFormDataFields(req.body) : req.body
+    let entry = req.file ? parseFormDataFields(req.body) : req.body
     if (!entry) return res.status(400).send('No data')
 
     entry._id          = makeId()
     entry._submittedAt = entry._submittedAt || new Date().toISOString()
     entry._receivedAt  = new Date().toISOString()
     entry._ip          = req.ip
+
+    // Stamp dentistId from token (server-authoritative, must be before getPatientFolder)
+    const _sa = req.headers['authorization'] || ''
+    const _st = _sa.replace(/^Bearer /i, '').trim()
+    const _sd = activeTokens.get(_st) || {}
+    if (_sd.dentistId) {
+      entry.attendingDentistId = _sd.dentistId
+      entry.attendingDentist   = _sd.dentistName
+    }
 
     const patientFolder = getPatientFolder(entry)
     if (!fsSync.existsSync(patientFolder)) {

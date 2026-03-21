@@ -45,12 +45,16 @@
         </nav>
 
         <div class="dash-sidebar-footer">
+          <button id="clinicConfigBtn" class="dash-sidebar-action">
+            Clinic Config
+          </button>
           <button id="changePasswordBtn" class="dash-sidebar-action">
             Change Password
           </button>
           <button id="createBackup" class="dash-sidebar-action">
             Backup
           </button>
+          <div id="adminLoggedInAs" class="admin-logged-as"></div>
           <button id="adminLogout" class="dash-sidebar-action danger">
             Logout
           </button>
@@ -303,6 +307,28 @@
           </div>
           <div id="loginError" class="form-error"></div>
         </form>
+      </div>
+    </div>
+
+    <!-- Dentist Login Screen — shown before patient form -->
+    <div id="dentistLoginScreen" class="dls-overlay" style="display:none;">
+      <div class="dls-card">
+        <div class="dls-logo">EZ</div>
+        <h2 class="dls-title">Enzymess Dental</h2>
+        <p class="dls-sub">Sign in to begin patient intake</p>
+        <form id="dentistLoginForm" class="dls-form" autocomplete="off">
+          <div class="dls-field">
+            <label class="dls-label" for="dlsUsername">Username</label>
+            <input id="dlsUsername" type="text" class="dls-input" placeholder="Enter username" autocomplete="username" />
+          </div>
+          <div class="dls-field">
+            <label class="dls-label" for="dlsPassword">Password</label>
+            <input id="dlsPassword" type="password" class="dls-input" placeholder="Enter password" autocomplete="current-password" />
+          </div>
+          <div id="dlsError" class="dls-error" style="display:none;"></div>
+          <button type="submit" class="dls-btn">Sign In</button>
+        </form>
+        <p class="dls-hint">Patients — ask your dentist to sign in for you.</p>
       </div>
     </div>
 
@@ -828,13 +854,13 @@
     <div class="pm-panel">
       <div class="pm-header">
         <div class="pm-header-content">
-          <div class="pm-photo-wrapper">
+          <div class="pm-photo-wrapper" id="pmPhotoWrapper">
             <img id="pmPhoto" class="pm-photo" src="" alt="Patient" />
             <div class="pm-photo-overlay">
               <span>Change Photo</span>
             </div>
-            <input id="pmPhotoInput" type="file" accept="image/*" />
           </div>
+          <input id="pmPhotoInput" type="file" accept="image/*" style="display:none;" />
           <div class="pm-title-group">
             <h2 id="pmName">Patient Name</h2>
             <div id="pmSub">Born: Unknown  0 visits</div>
@@ -1094,7 +1120,7 @@
             <input type="date" name="date" />
           </label>
           <label>Time
-            <input type="time" name="appointmentTime" />
+            <input type="time" name="apptTime" />
           </label>
           <label>Tooth Number
             <input type="text" name="ToothNo" placeholder="e.g., 11, 21" />
@@ -1174,24 +1200,12 @@
             </label>
             <input class="tmp-input" type="date" name="date" />
           </div>
-        </div>
-
-        <div class="tmp-grid">
           <div class="tmp-field">
             <label class="tmp-label">
               <span class="tmp-label-icon"></span>
               Appointment Time
             </label>
-            <input class="tmp-input" type="time" name="appointmentTime" />
-          </div>
-          <div class="tmp-field">
-            <label class="tmp-label">
-              <span class="tmp-label-icon"></span>
-              Attending Dentist
-            </label>
-            <select class="tmp-input" name="attendingDentistId" id="tmpDentistSelect">
-              <option value="">— Select Dentist —</option>
-            </select>
+            <input class="tmp-input" type="time" name="apptTime" />
           </div>
         </div>
 
@@ -1236,6 +1250,8 @@
     </div>
   </div>
 
+  <!-- License / feature gating (loads before everything else) -->
+  <script src="/js/license.js" defer></script>
   <!-- Core globals and utilities -->
   <script src="/js/globals.js" defer></script>
   <script src="/js/tooth-status.js" defer></script>
@@ -1260,6 +1276,7 @@
   <script src="/js/prescriptions.js" defer></script>
   <script src="/js/change-password.js" defer></script>
   <script src="/js/temp-patient.js" defer></script>
+  <script src="/js/clinic-config.js" defer></script>
   <!-- Initialization (must load last) -->
   <script src="/js/init.js" defer></script>
 

@@ -27,6 +27,19 @@ const codeBackupDir  = path.resolve(__dirname, '../../CodeBackup')
 const teethBaseDir   = path.join(filesDir, 'teeth_base')
 const imagesDir      = path.join(__dirname, '../../patient-images')
 const credentialsPath = path.join(__dirname, '../../credentials.json')
+const dentistsPath    = path.join(__dirname, '../../dentists.json')
+
+function loadDentists() {
+  try {
+    if (fsSync.existsSync(dentistsPath))
+      return JSON.parse(fsSync.readFileSync(dentistsPath, 'utf8'))
+  } catch (e) { console.error('dentists.json error:', e.message) }
+  return []
+}
+
+function saveDentists(list) {
+  fsSync.writeFileSync(dentistsPath, JSON.stringify(list, null, 2), 'utf8')
+}
 
 /**
  * ENSURE DIRECTORY STRUCTURE
@@ -86,7 +99,7 @@ if (!fsSync.existsSync(credentialsPath)) {
  * 
  * Note: For production, consider using a persistent session store or database.
  */
-const activeTokens = new Map()
+const activeTokens = new Map() // token -> { username, dentistId, dentistName, role, version, createdAt }
 
 /**
  * EXPRESS APPLICATION INITIALIZATION
@@ -118,5 +131,8 @@ module.exports = {
   credentialsPath,
   loadCredentials,
   saveCredentials,
-  activeTokens
+  activeTokens,
+  dentistsPath,
+  loadDentists,
+  saveDentists
 }
