@@ -6,7 +6,6 @@ patients/
 Backup/
 CodeBackup/
 patient-images/
-Files/
 
 # Secrets — NEVER commit these
 dentists.json
