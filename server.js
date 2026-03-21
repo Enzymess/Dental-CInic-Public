@@ -15,14 +15,17 @@ const { PDFDocument, StandardFonts, rgb } = require('pdf-lib')
 const multer     = require('multer')
 const archiver   = require('archiver')
 
-const patientsDir = path.resolve(__dirname, 'patients')
-const filesDir = path.resolve(__dirname, 'Files')
-const backupDir = path.resolve(__dirname, 'Backup')
-const codeBackupDir = path.resolve(__dirname, 'CodeBackup')
-const teethBaseDir = path.join(filesDir, 'teeth_base')
-const imagesDir = path.join(__dirname, 'patient-images')
-const credentialsPath = path.join(__dirname, 'credentials.json')
-const dentistsPath    = path.join(__dirname, 'dentists.json')
+// DATA_DIR env var allows Railway/cloud to point to a persistent volume
+// Locally it defaults to the project folder so nothing changes
+const dataDir     = process.env.DATA_DIR || __dirname
+const patientsDir = path.join(dataDir, 'patients')
+const filesDir    = path.join(dataDir, 'Files')
+const backupDir   = path.join(dataDir, 'Backup')
+const codeBackupDir = path.join(dataDir, 'CodeBackup')
+const teethBaseDir  = path.join(filesDir, 'teeth_base')
+const imagesDir     = path.join(dataDir, 'patient-images')
+const credentialsPath = path.join(dataDir, 'credentials.json')
+const dentistsPath    = path.join(dataDir, 'dentists.json')
 
 function loadDentists() {
   try { if (fsSync.existsSync(dentistsPath)) return JSON.parse(fsSync.readFileSync(dentistsPath, 'utf8')) }
@@ -461,7 +464,7 @@ function _drawSectionHeader(page, text, x, y, width, font) {
 // APP SETUP
 // =====================================================
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000  // Railway sets PORT automatically
 const CLINIC_DENTIST_NAME = 'Dr. Dela Cruz'
 
 // =====================================================
@@ -2814,9 +2817,10 @@ if (process.argv[2] === '--add-dentist') {
 
 if (require.main === module) {
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running locally on http://localhost:${PORT}`)
-    console.log(`Patients directory: ${patientsDir}`)
-    console.log(`Teeth base directory: ${teethBaseDir}`)
-    console.log(`Backup directory: ${backupDir}`)
+    console.log(`\n🦷 Enzymess Dental — Server running on http://localhost:${PORT}`)
+    console.log(`📁 Data directory:    ${dataDir}`)
+    console.log(`👥 Patients:          ${patientsDir}`)
+    console.log(`🦷 Teeth base:        ${teethBaseDir}`)
+    console.log(`💾 Backups:           ${backupDir}\n`)
   })
 }

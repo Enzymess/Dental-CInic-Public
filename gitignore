@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Patient data — NEVER commit these
+patients/
+Backup/
+CodeBackup/
+patient-images/
+Files/
+
+# Secrets — NEVER commit these
+dentists.json
+credentials.json
+.env
+*.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp files
+temp-patients.json
