@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Enzymess Dental — Patient Information Record</title>
+  <title>PDA Dental Chart — Patient Information Record</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <main class="container">
     <div class="topbar">
       <div class="brand">
-        <div class="logo">EZ</div>
+        <div class="logo">PDA</div>
         <div class="brand-text">
-          <div class="org">ENZYMESS DENTAL</div>
+          <div class="org">PHILIPPINE DENTAL ASSOCIATION</div>
           <div class="sub">Patient Information &amp; Consent Form System</div>
         </div>
       </div>
@@ -23,7 +23,7 @@
 
       <div class="dash-sidebar">
         <div class="dash-sidebar-brand">
-          <div class="dash-sidebar-logo">EZ</div>
+          <div class="dash-sidebar-logo">PDA</div>
           <div class="dash-sidebar-title">Admin Portal</div>
         </div>
 
@@ -51,7 +51,6 @@
           <button id="createBackup" class="dash-sidebar-action">
             Backup
           </button>
-          <div id="adminLoggedInAs" class="admin-logged-as"></div>
           <button id="adminLogout" class="dash-sidebar-action danger">
             Logout
           </button>
@@ -103,7 +102,7 @@
           </div>
 
           <!-- Financial Summary Row -->
-          <div class="dash-fin-row" id="dashFinRow">
+          <div class="dash-fin-row">
             <div class="dash-fin-row-header">
               <span class="dash-fin-row-title">Financial Summary</span>
               <span class="dash-fin-row-note">Revenue counts <strong>Paid</strong> only</span>
@@ -293,7 +292,7 @@
         <h3>Admin Login</h3>
         <form id="loginForm">
           <label>Username
-            <input name="username" type="text" placeholder="Username" />
+            <input name="username" type="text" value="admin" />
           </label>
           <label>Password
             <input name="password" type="password" autocomplete="current-password" />
@@ -304,28 +303,6 @@
           </div>
           <div id="loginError" class="form-error"></div>
         </form>
-      </div>
-    </div>
-
-    <!-- Dentist Login Screen -->
-    <div id="dentistLoginScreen" class="dls-overlay" style="display:none;">
-      <div class="dls-card">
-        <div class="dls-logo">EZ</div>
-        <h2 class="dls-title">Enzymess Dental</h2>
-        <p class="dls-sub">Sign in to begin patient intake</p>
-        <form id="dentistLoginForm" class="dls-form" autocomplete="off">
-          <div class="dls-field">
-            <label class="dls-label" for="dlsUsername">Username</label>
-            <input id="dlsUsername" type="text" class="dls-input" placeholder="Enter username" autocomplete="username" />
-          </div>
-          <div class="dls-field">
-            <label class="dls-label" for="dlsPassword">Password</label>
-            <input id="dlsPassword" type="password" class="dls-input" placeholder="Enter password" autocomplete="current-password" />
-          </div>
-          <div id="dlsError" class="dls-error" style="display:none;"></div>
-          <button type="submit" class="dls-btn">Sign In</button>
-        </form>
-        <p class="dls-hint">Patients — ask your dentist to sign in for you.</p>
       </div>
     </div>
 
@@ -1116,6 +1093,9 @@
           <label>Date *
             <input type="date" name="date" />
           </label>
+          <label>Time
+            <input type="time" name="appointmentTime" />
+          </label>
           <label>Tooth Number
             <input type="text" name="ToothNo" placeholder="e.g., 11, 21" />
           </label>
@@ -1193,6 +1173,25 @@
               Appointment Date <span class="tmp-required">*</span>
             </label>
             <input class="tmp-input" type="date" name="date" />
+          </div>
+        </div>
+
+        <div class="tmp-grid">
+          <div class="tmp-field">
+            <label class="tmp-label">
+              <span class="tmp-label-icon"></span>
+              Appointment Time
+            </label>
+            <input class="tmp-input" type="time" name="appointmentTime" />
+          </div>
+          <div class="tmp-field">
+            <label class="tmp-label">
+              <span class="tmp-label-icon"></span>
+              Attending Dentist
+            </label>
+            <select class="tmp-input" name="attendingDentistId" id="tmpDentistSelect">
+              <option value="">— Select Dentist —</option>
+            </select>
           </div>
         </div>
 

@@ -1242,7 +1242,15 @@ app.get('/all-treatment-records', requireAuth, async (req, res) => {
     // Merge temporary patients from the dedicated temp-patients.json file.
     // These appear on the calendar/schedule but NOT in the Patient List.
     const tempPatients = await readTempPatients()
+    // Get dentistId from token to filter temp patients too
+    const _mrgAuth = req.headers['authorization'] || ''
+    const _mrgTkn  = _mrgAuth.replace(/^Bearer /i, '').trim()
+    const _mrgTd   = activeTokens.get(_mrgTkn) || {}
+    const _mrgFilter = _mrgTd.dentistId || null
+
     tempPatients.forEach(rec => {
+      // Filter temp patients by dentist just like regular patients
+      if (_mrgFilter && rec.attendingDentistId && rec.attendingDentistId !== _mrgFilter) return
       allRecords.push({
         ...rec,
         _isTemp: true,
@@ -2131,7 +2139,7 @@ app.get('/export-all-records/:patientFolder', requireAuth, async (req, res) => {
 // =====================================================
 
 // Path to the standalone temporary-patients JSON file (never mixed with real patient folders)
-const tempPatientsFile = path.join(__dirname, 'temp-patients.json')
+const tempPatientsFile = path.join(dataDir, 'temp-patients.json')
 
 async function readTempPatients() {
   if (!fsSync.existsSync(tempPatientsFile)) return []
@@ -2151,10 +2159,17 @@ async function writeTempPatients(list) {
 // Data is stored ONLY in temp-patients.json and never appears in the Patient List.
 app.post('/temp-patient', requireAuth, async (req, res) => {
   try {
-    const { fullName, mobileNo, date, appointmentTime, procedure, amountChanged, denticals } = req.body
+    const { fullName, mobileNo, date, appointmentTime, procedure, amountChanged, denticals, attendingDentistId, attendingDentist } = req.body
 
     if (!fullName || !fullName.trim()) return res.status(400).send('Full name is required')
     if (!date) return res.status(400).send('Date is required')
+
+    // Use token dentistId if not explicitly provided
+    const _ta  = req.headers['authorization'] || ''
+    const _tt  = _ta.replace(/^Bearer /i, '').trim()
+    const _td  = activeTokens.get(_tt) || {}
+    const dentistId   = attendingDentistId || _td.dentistId   || ''
+    const dentistName = attendingDentist   || _td.dentistName || ''
 
     const newRecord = {
       id: `TEMP_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
@@ -2171,7 +2186,9 @@ app.post('/temp-patient', requireAuth, async (req, res) => {
       _firstName: fullName.trim().split(' ')[0],
       _lastName: fullName.trim().split(' ').slice(1).join(' ') || '',
       _mobileNo: mobileNo || '',
-      _patientFolder: null   // no folder — temp only
+      _patientFolder: null,
+      attendingDentistId: dentistId,
+      attendingDentist:   dentistName
     }
 
     const list = await readTempPatients()

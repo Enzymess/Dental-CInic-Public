@@ -178,7 +178,15 @@ function renderScheduleList() {
   if (scheduleFilter === 'pending')  records = records.filter(r => !r._completed);
   if (scheduleFilter === 'finished') records = records.filter(r =>  r._completed);
 
-  records.sort((a, b) => new Date(a.date || a._timestamp || 0) - new Date(b.date || b._timestamp || 0));
+  records.sort((a, b) => {
+    const da = new Date(a.date || a._timestamp || 0);
+    const db = new Date(b.date || b._timestamp || 0);
+    if (da - db !== 0) return da - db;
+    // Same date — sort by appointmentTime
+    const ta = a.appointmentTime || '99:99';
+    const tb = b.appointmentTime || '99:99';
+    return ta.localeCompare(tb);
+  });
 
   renderAppointmentCards(records, container);
 }
@@ -229,12 +237,13 @@ function renderAppointmentCards(records, container) {
     recEl.innerHTML = `
       <div class="appt-time">
         <span class="date">${dateStr}</span>
+        ${rec.appointmentTime ? `<span class="appt-clock">${(h => `${h % 12 || 12}:${rec.appointmentTime.split(':')[1]} ${h < 12 ? 'AM' : 'PM'}`)(parseInt(rec.appointmentTime.split(':')[0]))}</span>` : ''}
         ${toothNo ? `<span class="appt-tooth">${toothNo}</span>` : ''}
       </div>
       <div class="appt-patient-col">${photoHtml}</div>
       <div class="appt-info">
         <h4>${rec._patientName || 'Unknown Patient'}${followUpBadge}${tempBadge}</h4>
-        <p>${contact}</p>
+        <p>${isTemp && rec.attendingDentist ? '<span class="appt-dentist">Dr: ' + rec.attendingDentist + '</span>' : contact}</p>
         <div class="reason">${procedure}</div>
         ${rec.nextApps && rec._completed
           ? `<div class="appt-next">Next appt: ${new Date(rec.nextApps).toLocaleDateString()}</div>`
@@ -284,4 +293,3 @@ function renderAppointmentCards(records, container) {
     container.appendChild(recEl);
   });
 }
-
