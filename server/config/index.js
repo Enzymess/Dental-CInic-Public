@@ -20,14 +20,17 @@ const path      = require('path')
  * =======================
  * Define absolute paths to all persistent data directories used by the application
  */
-const patientsDir    = path.resolve(__dirname, '../../patients')
-const filesDir       = path.resolve(__dirname, '../../Files')
-const backupDir      = path.resolve(__dirname, '../../Backup')
-const codeBackupDir  = path.resolve(__dirname, '../../CodeBackup')
+// DATA_DIR lets Railway point to a persistent volume (/data)
+// Locally defaults to project root — no change needed
+const dataDir        = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.resolve(__dirname, '../../')
+const patientsDir    = path.join(dataDir, 'patients')
+const filesDir       = path.join(dataDir, 'Files')
+const backupDir      = path.join(dataDir, 'Backup')
+const codeBackupDir  = path.join(dataDir, 'CodeBackup')
 const teethBaseDir   = path.join(filesDir, 'teeth_base')
-const imagesDir      = path.join(__dirname, '../../patient-images')
-const credentialsPath = path.join(__dirname, '../../credentials.json')
-const dentistsPath    = path.join(__dirname, '../../dentists.json')
+const imagesDir      = path.join(dataDir, 'patient-images')
+const credentialsPath = path.join(dataDir, 'credentials.json')
+const dentistsPath    = path.join(dataDir, 'dentists.json')
 
 function loadDentists() {
   try {
