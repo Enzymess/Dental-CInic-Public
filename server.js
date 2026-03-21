@@ -1,6 +1,5 @@
 'use strict'
 
-const functions  = require('firebase-functions')
 const express    = require('express')
 const fsSync     = require('fs')
 const { promises: fs } = require('fs')
@@ -2783,8 +2782,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'main.html'))
 })
 
-// Export for Firebase Cloud Functions
-exports.server = functions.https.onRequest(app)
 
 // Also allow running locally with: node server.js
 // Global error handler — full stack logged server-side, generic message to client
