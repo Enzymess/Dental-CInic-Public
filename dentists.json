@@ -1,0 +1,42 @@
+[
+  {
+    "id": "enzo",
+    "name": "Dr. Enzo",
+    "title": "DMD",
+    "specialty": "General Dentistry",
+    "username": "Enzo",
+    "password": "$2b$12$UWSySxo40ho8RMVR7MZ8RuTisvss2.mEnIq7s5npRTbXgrJXfkr/6",
+    "role": "dentist",
+    "version": 4
+  },
+  {
+    "id": "santos",
+    "name": "Dr. Maria Santos",
+    "title": "DMD",
+    "specialty": "Orthodontics",
+    "username": "Maria",
+    "password": "$2b$12$LzVpsAj4PokhTT15pgkvmuQ8IAfUdmsouqGbAsiEXv8BENKG8U/tO",
+    "role": "dentist",
+    "version": 3
+  },
+  {
+    "id": "reyes",
+    "name": "Dr. Jose Reyes",
+    "title": "DMD",
+    "specialty": "Oral Surgery",
+    "username": "Jose",
+    "password": "$2b$12$qBcDxJP83iq.neLLqXADceBmivOn1kkuHC48vfRdXnX7/4xdHTXte",
+    "role": "dentist",
+    "version": 3
+  },
+  {
+    "id": "admin",
+    "name": "Admin",
+    "title": "",
+    "specialty": "",
+    "username": "admin",
+    "password": "$2b$12$gtz593BAM7rgmkNdmY5/U.t7X7ca/rq8wXuUmb90fX5wE6ozbE9JC",
+    "role": "admin",
+    "version": 4
+  }
+]

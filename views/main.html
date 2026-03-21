@@ -1,0 +1,1705 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Enzymess Dental — Patient Information Record</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <main class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">EZ</div>
+        <div class="brand-text">
+          <div class="org">ENZYMESS DENTAL</div>
+          <div class="sub">Patient Information &amp; Consent Form System</div>
+        </div>
+      </div>
+      <button id="adminBtn" class="admin-btn"> Admin Portal</button>
+    </div>
+
+    <aside id="adminPanel" class="admin-panel hidden" aria-hidden="true">
+
+      <div class="dash-sidebar">
+        <div class="dash-sidebar-brand">
+          <div class="dash-sidebar-logo">EZ</div>
+          <div class="dash-sidebar-title">Admin Portal</div>
+        </div>
+
+        <nav class="dash-nav">
+          <button class="dash-nav-btn active" data-view="dashView" id="navDashboard">
+            <span>Dashboard</span>
+          </button>
+          <button class="dash-nav-btn" data-view="scheduleView" id="navSchedule">
+            <span>Schedule</span>
+          </button>
+          <button class="dash-nav-btn" data-view="patientsView" id="navPatients">
+            <span>Patient List</span>
+            <span id="patientsCount" class="sidebar-badge">0</span>
+          </button>
+          <button class="dash-nav-btn" data-view="billingView" id="navBilling">
+            <span>Billing</span>
+            <span id="billingUnpaidCount" class="sidebar-badge badge-danger">0</span>
+          </button>
+        </nav>
+
+        <div class="dash-sidebar-footer">
+          <button id="changePasswordBtn" class="dash-sidebar-action">
+            Change Password
+          </button>
+          <button id="createBackup" class="dash-sidebar-action">
+            Backup
+          </button>
+          <div id="adminLoggedInAs" class="admin-logged-as"></div>
+          <button id="adminLogout" class="dash-sidebar-action danger">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div class="dash-main">
+
+        <div id="dashView" class="dash-view active">
+          <div class="dash-topbar">
+            <div>
+              <h2 class="dash-view-title">Dashboard</h2>
+              <p class="dash-view-sub" id="dashTodayDate"></p>
+            </div>
+            <button id="refreshPatients" class="btn small">Refresh</button>
+          </div>
+
+          <div class="dash-stats-row">
+            <div class="dash-stat-card stat-total">
+              <div class="dash-stat-body">
+                <div class="dash-stat-value" id="totalAppointments">0</div>
+                <div class="dash-stat-label">Today's Total</div>
+              </div>
+            </div>
+            <div class="dash-stat-card stat-pending">
+              <div class="dash-stat-body">
+                <div class="dash-stat-value" id="pendingAppointments">0</div>
+                <div class="dash-stat-label">Pending</div>
+              </div>
+            </div>
+            <div class="dash-stat-card stat-ongoing">
+              <div class="dash-stat-body">
+                <div class="dash-stat-value" id="ongoingAppointments">0</div>
+                <div class="dash-stat-label">Ongoing</div>
+              </div>
+            </div>
+            <div class="dash-stat-card stat-done">
+              <div class="dash-stat-body">
+                <div class="dash-stat-value" id="finishedAppointments">0</div>
+                <div class="dash-stat-label">Done</div>
+              </div>
+            </div>
+            <div class="dash-stat-card stat-patients">
+              <div class="dash-stat-body">
+                <div class="dash-stat-value" id="totalPatientsCount">0</div>
+                <div class="dash-stat-label">Total Patients</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial Summary Row -->
+          <div class="dash-fin-row" id="dashFinRow">
+            <div class="dash-fin-row-header">
+              <span class="dash-fin-row-title">Financial Summary</span>
+              <span class="dash-fin-row-note">Revenue counts <strong>Paid</strong> only</span>
+              <button id="refreshFinancial" class="fin-refresh-btn-inline" title="Refresh financial data">Refresh</button>
+            </div>
+            <div class="dash-fin-cards">
+              <div class="dash-fin-card fin-daily">
+                <div class="dash-fin-value" id="finDailyRevenue">P 0.00</div>
+                <div class="dash-fin-label">Today's Revenue</div>
+              </div>
+              <div class="dash-fin-card fin-monthly">
+                <div class="dash-fin-value" id="finMonthlyRevenue">P 0.00</div>
+                <div class="dash-fin-label">This Month</div>
+              </div>
+              <div class="dash-fin-card fin-total">
+                <div class="dash-fin-value" id="finTotalRevenue">P 0.00</div>
+                <div class="dash-fin-label">Total Revenue</div>
+              </div>
+              <div class="dash-fin-card fin-expenses">
+                <div class="dash-fin-value" id="finTotalExpenses">P 0.00</div>
+                <div class="dash-fin-label">Total Expenses</div>
+              </div>
+              <div class="dash-fin-card fin-profit">
+                <div class="dash-fin-value" id="finNetProfit">P 0.00</div>
+                <div class="dash-fin-label">Net Profit</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Appointments List -->
+          <div class="dash-section">
+            <div class="dash-section-header">
+              <h3>Appointments</h3>
+              <div class="appointments-filter">
+                <button class="filter-btn" data-filter="all">All</button>
+                <button class="filter-btn active" data-filter="today">Today</button>
+                <button class="filter-btn" data-filter="3days">Next 3 Days</button>
+                <button class="filter-btn" data-filter="week">This Week</button>
+              </div>
+            </div>
+            <div id="appointmentsList" class="appointments-list">
+              <div class="appointments-loading">
+                <div class="spinner"></div>
+                <p>Loading appointments...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="scheduleView" class="dash-view">
+          <div class="dash-topbar">
+            <div>
+              <h2 class="dash-view-title">Schedule</h2>
+              <p class="dash-view-sub" id="scheduleMonthLabel"></p>
+            </div>
+            <div class="sched-topbar-actions">
+              <button id="schedPrevMonth" class="btn small alt">&lsaquo; Prev</button>
+              <button id="schedTodayBtn" class="btn small">Today</button>
+              <button id="schedNextMonth" class="btn small alt">Next &rsaquo;</button>
+              <button id="refreshSchedule" class="btn small">Refresh</button>
+            </div>
+          </div>
+
+          <div class="sched-legend">
+            <span class="sched-legend-dot pending"></span> Pending
+            <span class="sched-legend-dot finished"></span> Finished
+            <span class="sched-legend-dot mixed"></span> Mixed
+          </div>
+
+          <div class="sched-calendar-wrap dash-section">
+            <div class="sched-dow-header">
+              <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div>
+              <div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+            <div id="schedCalendarGrid" class="sched-calendar-grid"></div>
+          </div>
+
+          <div class="dash-section" id="schedDaySection" style="display:none;">
+            <div class="dash-section-header">
+              <h3 id="schedDayTitle">Appointments</h3>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button id="addTempPatientBtn" class="btn small success">+ Add Temporary Patient</button>
+                <button id="schedDayClose" class="btn small alt">Close</button>
+              </div>
+            </div>
+            <div id="schedDayList" class="appointments-list"></div>
+          </div>
+
+          <div class="dash-section">
+            <div class="dash-section-header">
+              <h3>All Appointments This Month</h3>
+              <div class="appointments-filter" id="schedFilter">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="finished">Finished</button>
+              </div>
+            </div>
+            <div id="schedAppointmentsList" class="appointments-list">
+              <div class="appointments-loading">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="patientsView" class="dash-view">
+          <div class="dash-topbar">
+            <div>
+              <h2 class="dash-view-title">Patient List</h2>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input id="searchPatients" placeholder="Search by name or birthdate (YYYY-MM-DD)" class="dash-search" />
+              <button id="refreshPatientsBtn2" class="btn small">Refresh</button>
+            </div>
+          </div>
+          <div id="patientsList" class="patients-list" role="region" aria-live="polite"></div>
+        </div>
+
+        <div id="billingView" class="dash-view">
+          <div class="dash-topbar">
+            <div>
+              <h2 class="dash-view-title">Billing</h2>
+              <p class="dash-view-sub">All treatment records and payment status</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button id="refreshBillingBtn" class="btn small">Refresh</button>
+              <button id="addBillingBtn" class="btn small success">Add Billing Record</button>
+            </div>
+          </div>
+
+          <div class="billing-totals-row">
+            <div class="billing-total-card btc-total">
+              <div class="btc-value" id="bvTotalCharged">P 0.00</div>
+              <div class="btc-label">Total Charged</div>
+            </div>
+            <div class="billing-total-card btc-paid">
+              <div class="btc-value" id="bvTotalPaid">P 0.00</div>
+              <div class="btc-label">Total Collected</div>
+            </div>
+            <div class="billing-total-card btc-balance">
+              <div class="btc-value" id="bvTotalBalance">P 0.00</div>
+              <div class="btc-label">Outstanding Balance</div>
+            </div>
+            <div class="billing-total-card btc-unpaid-count">
+              <div class="btc-value" id="bvUnpaidCount">0</div>
+              <div class="btc-label">Unpaid Records</div>
+            </div>
+          </div>
+
+          <div class="billing-filter-row">
+            <button class="billing-filter-btn active" data-bfilter="all">All</button>
+            <button class="billing-filter-btn" data-bfilter="unpaid">Unpaid</button>
+            <button class="billing-filter-btn" data-bfilter="paid">Paid</button>
+            <div style="flex:1;"></div>
+            <input id="billingSearch" class="dash-search" placeholder="Search patient or procedure..." style="width:240px;" />
+          </div>
+
+          <div class="billing-table-wrap">
+            <table class="billing-table" id="billingTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Patient</th>
+                  <th>Procedure</th>
+                  <th>Tooth</th>
+                  <th>Charged</th>
+                  <th>Paid</th>
+                  <th>Balance</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="billingTableBody">
+                <tr><td colspan="9" class="billing-empty">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-inner" role="dialog" aria-modal="true">
+        <h3>Admin Login</h3>
+        <form id="loginForm">
+          <label>Username
+            <input name="username" type="text" placeholder="Username" />
+          </label>
+          <label>Password
+            <input name="password" type="password" autocomplete="current-password" />
+          </label>
+          <div class="modal-actions">
+            <button type="button" id="loginCancel" class="btn alt">Cancel</button>
+            <button type="submit" class="btn">Login</button>
+          </div>
+          <div id="loginError" class="form-error"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Dentist Login Screen -->
+    <div id="dentistLoginScreen" class="dls-overlay" style="display:none;">
+      <div class="dls-card">
+        <div class="dls-logo">EZ</div>
+        <h2 class="dls-title">Enzymess Dental</h2>
+        <p class="dls-sub">Sign in to begin patient intake</p>
+        <form id="dentistLoginForm" class="dls-form" autocomplete="off">
+          <div class="dls-field">
+            <label class="dls-label" for="dlsUsername">Username</label>
+            <input id="dlsUsername" type="text" class="dls-input" placeholder="Enter username" autocomplete="username" />
+          </div>
+          <div class="dls-field">
+            <label class="dls-label" for="dlsPassword">Password</label>
+            <input id="dlsPassword" type="password" class="dls-input" placeholder="Enter password" autocomplete="current-password" />
+          </div>
+          <div id="dlsError" class="dls-error" style="display:none;"></div>
+          <button type="submit" class="dls-btn">Sign In</button>
+        </form>
+        <p class="dls-hint">Patients — ask your dentist to sign in for you.</p>
+      </div>
+    </div>
+
+    <!-- Main Form -->
+    <form id="dentalForm" class="form" autocomplete="off" novalidate>
+      
+      <!-- PAGE 1: Patient Information -->
+      <section class="form-page active" data-page="0">
+        <div class="section-header">
+          <span class="icon"></span>
+          <h3>Patient Information</h3>
+        </div>
+        <div class="section-intro">
+          <strong>Welcome!</strong> Please fill out all required fields marked with a blue left border. This information helps us provide you with the best dental care possible.
+        </div>
+
+        <div class="row">
+          <label>Last Name<input name="lastName" type="text" placeholder="Dela Cruz"></label>
+          <label>First Name<input name="firstName" type="text" placeholder="Juan"></label>
+          <label>Middle Name<input name="middleName" type="text" placeholder="Santos"></label>
+        </div>
+
+        <div class="row">
+          <label>Birthdate<input name="birthdate" type="date"></label>
+          <label>Age<input name="age" type="number" min="0" placeholder="25"></label>
+          <label>Sex *
+            <select name="sex">
+              <option value="">Select</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row">
+          <label>Nickname<input name="nickname" type="text" placeholder="Optional"></label>
+          <label>Religion<input name="religion" type="text" placeholder="Catholic"></label>
+          <label>Nationality<input name="nationality" type="text" placeholder="Filipino"></label>
+        </div>
+
+        <label>Home Address<input name="homeAddress" type="text" placeholder="123 Main St, Barangay Santo Rosario"></label>
+
+        <div class="row">
+          <label>Home Phone<input name="homeNo" type="tel" placeholder="(02) 123-4567"></label>
+          <label>Office Phone<input name="officeNo" type="tel" placeholder="(02) 987-6543"></label>
+          <label>Fax Number<input name="faxNo" type="tel" placeholder="(02) 555-5555"></label>
+        </div>
+
+        <div class="row">
+          <label>Mobile Number<input name="mobileNo" type="tel" placeholder="0917-123-4567"></label>
+          <label>Email Address<input name="email" type="email" placeholder="juan.delacruz@email.com"></label>
+          <label>Occupation<input name="occupation" type="text" placeholder="Engineer"></label>
+        </div>
+
+        <div class="row">
+          <label>Dental Insurance<input name="dentalInsurance" type="text" placeholder="Insurance Company Name"></label>
+          <label>Insurance Effective Date<input name="insuranceEffectiveDate" type="date"></label>
+          <label>Policy Number<input name="policyNo" type="text" placeholder="POL-123456"></label>
+        </div>
+
+        <fieldset class="minor-fieldset">
+          <legend> For Minors / Guardian Information</legend>
+          <div class="row">
+            <label>Guardian's Name<input name="guardianName" type="text" placeholder="Maria Dela Cruz"></label>
+            <label>Guardian Occupation<input name="guardianOccupation" type="text" placeholder="Teacher"></label>
+            <label>Guardian Contact<input name="guardianContact" type="tel" placeholder="0918-765-4321"></label>
+          </div>
+        </fieldset>
+
+        <label>Whom may we thank for referring you?<input name="referredBy" type="text" placeholder="Dr. Smith / Friend's Name"></label>
+        <label>Reason for dental consultation<textarea name="reasonForConsult" rows="3" placeholder="Please describe your dental concerns or reasons for this visit..."></textarea></label>
+
+        <div class="nav">
+          <button type="button" class="btn next">Next → Patient History</button>
+        </div>
+      </section>
+
+      <!-- PAGE 2: Dental History -->
+      <section class="form-page" data-page="1">
+        <div class="section-header">
+          <span class="icon"></span>
+          <h3>Dental History</h3>
+        </div>
+        <div class="section-intro">
+          Tell us about your previous dental experiences to help us provide better care.
+        </div>
+
+        <div class="row">
+          <label>Previous Dentist Name<input name="previousDentist" type="text" placeholder="Dr. Juan Santos"></label>
+          <label>Last Dental Visit<input name="lastDentalVisit" type="date"></label>
+          <label>Frequency of Visits
+            <select name="visitFrequency">
+              <option value="">Select</option>
+              <option value="Regular">Regular (Every 6 months)</option>
+              <option value="Only when needed">Only when needed</option>
+              <option value="First visit">First visit</option>
+            </select>
+          </label>
+        </div>
+
+        <label>Previous Dental Treatments<textarea name="previousTreatments" rows="3" placeholder="List any fillings, extractions, root canals, braces, or other dental work you've had done..."></textarea></label>
+
+        <div class="nav">
+          <button type="button" class="btn alt prev">← Back</button>
+          <button type="button" class="btn next">Next → Medical History</button>
+        </div>
+      </section>
+
+      <!-- PAGE 3: Medical History -->
+      <section class="form-page" data-page="2">
+        <div class="section-header">
+          <span class="icon"></span>
+          <h3>Medical History</h3>
+        </div>
+        <div class="section-intro">
+          <strong>Important:</strong> Your medical history helps us ensure your safety during dental procedures. Please answer all questions honestly.
+        </div>
+
+        <div class="row">
+          <label>Physician Name<input name="physicianName" type="text" placeholder="Dr. Maria Santos"></label>
+          <label>Specialty<input name="physicianSpecialty" type="text" placeholder="General Practitioner"></label>
+          <label>Physician Contact<input name="physicianContact" type="tel" placeholder="(02) 123-4567"></label>
+        </div>
+
+        <label>Physician Office Address<input name="physicianOfficeAddress" type="text" placeholder="456 Medical St, Manila"></label>
+
+        <ol class="questions-list">
+          <li>
+            <div class="q">Are you in good health?</div>
+            <div class="options inline">
+              <label><input type="radio" name="q1_goodHealth" value="Yes"> Yes</label>
+              <label><input type="radio" name="q1_goodHealth" value="No"> No</label>
+            </div>
+          </li>
+
+          <li>
+            <div class="q">Are you under medical treatment now?</div>
+            <div class="options inline">
+              <label><input type="radio" name="q2_underTreatment" value="Yes"> Yes</label>
+              <label><input type="radio" name="q2_underTreatment" value="No"> No</label>
+            </div>
+            <label class="sub">If yes, what condition?<input name="q2_conditionBeingTreated" type="text" placeholder="Condition being treated"></label>
+          </li>
+
+          <li>
+            <div class="q">Have you ever had serious illness or surgical operation?</div>
+            <div class="options inline">
+              <label><input type="radio" name="q3_seriousIllness" value="Yes"> Yes</label>
+              <label><input type="radio" name="q3_seriousIllness" value="No"> No</label>
+            </div>
+            <label class="sub">If yes, please specify<input name="q3_illnessOperation" type="text" placeholder="Type of illness or operation"></label>
+          </li>
+
+          <li>
+            <div class="q">Have you ever been hospitalized?</div>
+            <div class="options inline">
+              <label><input type="radio" name="q4_hospitalized" value="Yes"> Yes</label>
+              <label><input type="radio" name="q4_hospitalized" value="No"> No</label>
+            </div>
+            <label class="sub">If yes, when and why?<input name="q4_whenWhy" type="text" placeholder="Date and reason"></label>
+          </li>
+
+          <li>
+            <div class="q">Are you taking any prescription or non-prescription medication?</div>
+            <div class="options inline">
+              <label><input type="radio" name="q5_takingMed" value="Yes"> Yes</label>
+              <label><input type="radio" name="q5_takingMed" value="No"> No</label>
+            </div>
+            <label class="sub">If yes, please list all medications<textarea name="q5_whatMedications" rows="2" placeholder="List all medications including vitamins and supplements"></textarea></label>
+          </li>
+
+          <li>
+            <div class="q">Do you use tobacco products?</div>
+            <div class="options inline">
+              <label><input type="radio" name="q6_tobacco" value="Yes"> Yes</label>
+              <label><input type="radio" name="q6_tobacco" value="No"> No</label>
+            </div>
+          </li>
+
+          <li>
+            <div class="q">Do you use alcohol, cocaine or other dangerous drugs?</div>
+            <div class="options inline">
+              <label><input type="radio" name="q7_drugs" value="Yes"> Yes</label>
+              <label><input type="radio" name="q7_drugs" value="No"> No</label>
+            </div>
+          </li>
+
+          <li>
+            <div class="q">Are you allergic to any of the following?</div>
+            <div class="options wrap">
+              <label><input type="checkbox" name="allergies" value="Local Anesthetic (ex. Lidocaine)"> Local Anesthetic (Lidocaine)</label>
+              <label><input type="checkbox" name="allergies" value="Penicillin / Antibiotics"> Penicillin/Antibiotics</label>
+              <label><input type="checkbox" name="allergies" value="Sulfa drugs"> Sulfa Drugs</label>
+              <label><input type="checkbox" name="allergies" value="Aspirin"> Aspirin</label>
+              <label><input type="checkbox" name="allergies" value="Latex"> Latex</label>
+            </div>
+            <label class="sub">Other allergies:<input name="allergies_other" type="text" placeholder="Specify other allergies"></label>
+          </li>
+
+          <li>
+            <div class="q">Bleeding Time</div>
+            <label><input name="q9_bleedingTime" type="text" placeholder="e.g., 2-5 minutes"></label>
+          </li>
+
+          <li>
+            <div class="q">For Women Only</div>
+            <div class="row sub">
+              <label>Pregnant?
+                <select name="q10_pregnant">
+                  <option value="">Select</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="N/A">N/A</option>
+                </select>
+              </label>
+              <label>Nursing?
+                <select name="q10_nursing">
+                  <option value="">Select</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="N/A">N/A</option>
+                </select>
+              </label>
+              <label>Taking Birth Control?
+                <select name="q10_birthControl">
+                  <option value="">Select</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="N/A">N/A</option>
+                </select>
+              </label>
+            </div>
+          </li>
+
+          <li>
+            <div class="q">Blood Type</div>
+            <label><input name="bloodType" type="text" placeholder="e.g., O+, A-, AB+"></label>
+          </li>
+
+          <li>
+            <div class="q">Blood Pressure</div>
+            <label><input name="bloodPressure" type="text" placeholder="e.g., 120/80"></label>
+          </li>
+        </ol>
+
+        <div class="nav">
+          <button type="button" class="btn alt prev">← Back</button>
+          <button type="button" class="btn next">Next → Health Conditions</button>
+        </div>
+      </section>
+
+      <!-- PAGE 4: Health Conditions -->
+      <section class="form-page" data-page="3">
+        <div class="section-header">
+          <span class="icon"></span>
+          <h3>Health Conditions</h3>
+        </div>
+        <div class="section-intro">
+          Check all conditions that apply to you. This information is crucial for your safety during dental treatment.
+        </div>
+
+        <div class="conditions-grid">
+          <label><input type="checkbox" name="conditions" value="High Blood Pressure"> High Blood Pressure</label>
+          <label><input type="checkbox" name="conditions" value="Low Blood Pressure"> Low Blood Pressure</label>
+          <label><input type="checkbox" name="conditions" value="Heart Disease"> Heart Disease</label>
+          <label><input type="checkbox" name="conditions" value="Heart Murmur"> Heart Murmur</label>
+          <label><input type="checkbox" name="conditions" value="Heart Attack"> Heart Attack</label>
+          <label><input type="checkbox" name="conditions" value="Heart Surgery"> Heart Surgery</label>
+          <label><input type="checkbox" name="conditions" value="Angina"> Angina</label>
+          <label><input type="checkbox" name="conditions" value="Rheumatic Fever"> Rheumatic Fever</label>
+          <label><input type="checkbox" name="conditions" value="Stroke"> Stroke</label>
+          <label><input type="checkbox" name="conditions" value="Anemia"> Anemia</label>
+          <label><input type="checkbox" name="conditions" value="Bleeding Problems"> Bleeding Problems</label>
+          <label><input type="checkbox" name="conditions" value="Blood Diseases"> Blood Diseases</label>
+          <label><input type="checkbox" name="conditions" value="Diabetes"> Diabetes</label>
+          <label><input type="checkbox" name="conditions" value="Cancer / Tumors"> Cancer/Tumors</label>
+          <label><input type="checkbox" name="conditions" value="Hepatitis / Liver Disease"> Hepatitis/Liver Disease</label>
+          <label><input type="checkbox" name="conditions" value="Hepatitis / Jaundice"> Jaundice</label>
+          <label><input type="checkbox" name="conditions" value="Tuberculosis"> Tuberculosis</label>
+          <label><input type="checkbox" name="conditions" value="AIDS or HIV Infection"> AIDS/HIV</label>
+          <label><input type="checkbox" name="conditions" value="Sexually Transmitted disease"> STD</label>
+          <label><input type="checkbox" name="conditions" value="Asthma"> Asthma</label>
+          <label><input type="checkbox" name="conditions" value="Emphysema"> Emphysema</label>
+          <label><input type="checkbox" name="conditions" value="Respiratory Problems"> Respiratory Problems</label>
+          <label><input type="checkbox" name="conditions" value="Hay Fever / Allergies"> Hay Fever/Allergies</label>
+          <label><input type="checkbox" name="conditions" value="Kidney disease"> Kidney Disease</label>
+          <label><input type="checkbox" name="conditions" value="Thyroid Problem"> Thyroid Problem</label>
+          <label><input type="checkbox" name="conditions" value="Arthritis / Rheumatism"> Arthritis/Rheumatism</label>
+          <label><input type="checkbox" name="conditions" value="Joint Replacement / Implant"> Joint Replacement</label>
+          <label><input type="checkbox" name="conditions" value="Head Injuries"> Head Injuries</label>
+          <label><input type="checkbox" name="conditions" value="Seizure / Epilepsy"> Seizure/Epilepsy</label>
+          <label><input type="checkbox" name="conditions" value="Fainting / Syncope"> Fainting/Syncope</label>
+          <label><input type="checkbox" name="conditions" value="Swollen ankles"> Swollen Ankles</label>
+          <label><input type="checkbox" name="conditions" value="Rapid weight Loss"> Rapid Weight Loss</label>
+          <label><input type="checkbox" name="conditions" value="Radiation Therapy"> Radiation Therapy</label>
+          <label><input type="checkbox" name="conditions" value="Chest pain"> Chest Pain</label>
+          <label><input type="checkbox" name="conditions" value="Stomach troubles / Ulcers"> Stomach/Ulcers</label>
+        </div>
+
+        <label class="mt-3">Other Conditions (please specify):<input name="conditions_other" type="text" placeholder="Any other health conditions not listed above"></label>
+
+        <div class="nav">
+          <button type="button" class="btn alt prev">← Back</button>
+          <button type="button" class="btn next">Next → Oral Habits</button>
+        </div>
+      </section>
+
+      <!-- PAGE 6: Take Photo -->
+      <section class="form-page" id="photoPage" data-page="5">
+        <div class="section-header">
+          <span class="icon"></span>
+          <h3>Patient Photo</h3>
+        </div>
+        <div class="section-intro">
+          Please take a clear photo for your patient record. The camera will capture after a 3-second countdown.
+        </div>
+
+        <div class="camera-container">
+          <video id="cameraView" autoplay playsinline></video>
+          <img id="cameraOutput" class="hidden" alt="Captured photo" />
+          <div id="timerText" class="timer-text"></div>
+
+          <div class="camera-buttons">
+            <button id="cameraCapture" type="button" class="btn"> Capture Photo</button>
+            <button id="cameraRetake" type="button" class="btn alt hidden"> Retake Photo</button>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn alt prev">← Back</button>
+          <button type="button" class="btn next">Next → Consent Form</button>
+        </div>
+      </section>
+
+      <!-- Consent Page 1 -->
+      <section class="form-page" data-page="6">
+        <div class="consent-container">
+          <div class="consent-header">
+            <h2> INFORMED CONSENT FOR DENTAL TREATMENT</h2>
+            <p class="subtitle">Please read carefully and initial each section</p>
+          </div>
+
+          <div class="consent-required-legend">
+            <span class="legend-dot-blue">Blue border = Required</span>
+            &nbsp;—&nbsp; All initialed sections and the signature below must be completed before submitting.
+          </div>
+
+          <div class="consent-section">
+            <h4>TREATMENT TO BE DONE</h4>
+            <p>I understand and consent to have any treatment done by the dentist after the procedure, the risks &amp; benefits &amp; cost have been fully explained.</p>
+            <div class="consent-initials">
+              <label>I have read and understood this section</label>
+              <input type="text" name="consent_treatment" placeholder="Initials" maxlength="5" />
+            </div>
+          </div>
+
+          <div class="consent-section">
+            <h4>DRUGS &amp; MEDICATIONS</h4>
+            <p>I understand that antibiotics, analgesics &amp; other medications can cause allergic reactions.</p>
+            <div class="consent-initials">
+              <label>I have read and understood this section</label>
+              <input type="text" name="consent_drugs" placeholder="Initials" maxlength="5" />
+            </div>
+          </div>
+
+          <div class="consent-section">
+            <h4>CHANGES IN TREATMENT PLAN</h4>
+            <p>I understand that during treatment it may be necessary to change or add procedures because of conditions found while working on the teeth that were not discovered during examination.</p>
+            <div class="consent-initials">
+              <label>I have read and understood this section</label>
+              <input type="text" name="consent_changes" placeholder="Initials" maxlength="5" />
+            </div>
+          </div>
+
+          <div class="consent-section">
+            <h4>RADIOGRAPH (X-RAY)</h4>
+            <p>I understand that an x-ray shot or a radiograph may be necessary as part of diagnostic aid.</p>
+            <div class="consent-initials">
+              <label>I have read and understood this section</label>
+              <input type="text" name="consent_xray" placeholder="Initials" maxlength="5" />
+            </div>
+          </div>
+        </div>
+
+        <div class="submit-row">
+          <button type="button" class="btn alt prev">← Back</button>
+          <button type="button" class="btn next">Next → Consent Page 2</button>
+        </div>
+      </section>
+
+      <!-- Consent Page 2 -->
+      <section class="form-page" data-page="7">
+        <div class="consent-container">
+          <div class="consent-header">
+            <h2> INFORMED CONSENT - Page 2</h2>
+            <p class="subtitle">Specific Procedures &amp; Risks</p>
+          </div>
+
+          <div class="consent-required-legend">
+            <span class="legend-dot-blue">Blue border = Required</span>
+            &nbsp;—&nbsp; All initialed sections and the signature below must be completed before submitting.
+          </div>
+
+          <div class="consent-section">
+            <h4>REMOVAL OF TEETH (EXTRACTION)</h4>
+            <p>I understand the alternatives to tooth removal and completely understand the risks &amp; benefits prior to authorizing the dentist to remove teeth.</p>
+            <div class="consent-initials">
+              <label>I have read and understood this section</label>
+              <input type="text" name="consent_extraction" placeholder="Initials" maxlength="5" />
+            </div>
+          </div>
+
+          <div class="consent-section">
+            <h4>CROWNS (CAPS) &amp; BRIDGES</h4>
+            <p>I understand that preparing a tooth may irritate the nerve tissue in the center of the tooth, leaving the tooth extra sensitive.</p>
+            <div class="consent-initials">
+              <label>I have read and understood this section</label>
+              <input type="text" name="consent_crowns" placeholder="Initials" maxlength="5" />
+            </div>
+          </div>
+
+          <div class="consent-section">
+            <h4>ENDODONTICS (ROOT CANAL)</h4>
+            <p>I understand there is no guarantee that a root canal treatment will save a tooth and that complications can occur from the treatment.</p>
+            <div class="consent-initials">
+              <label>I have read and understood this section</label>
+              <input type="text" name="consent_rootcanal" placeholder="Initials" maxlength="5" />
+            </div>
+          </div>
+
+          <div class="consent-section">
+            <h4>PERIODONTAL DISEASE</h4>
+            <p>I understand that periodontal disease is a serious condition causing gum &amp; bone inflammation and/or loss that can lead eventually to the loss of my teeth.</p>
+            <div class="consent-initials">
+              <label>I have read and understood this section</label>
+              <input type="text" name="consent_periodontal" placeholder="Initials" maxlength="5" />
+            </div>
+          </div>
+        </div>
+
+        <div class="submit-row">
+          <button type="button" class="btn alt prev">← Back</button>
+          <button type="button" class="btn next">Next → Consent Page 3</button>
+        </div>
+      </section>
+
+      <!-- Consent Page 3 -->
+      <section class="form-page" data-page="8">
+        <div class="consent-container">
+          <div class="consent-header">
+            <h2> INFORMED CONSENT - Page 3</h2>
+            <p class="subtitle">Final Procedures &amp; Authorization</p>
+          </div>
+
+          <div class="consent-required-legend">
+            <span class="legend-dot-blue">Blue border = Required</span>
+            &nbsp;—&nbsp; All initialed sections and the signature below must be completed before submitting.
+          </div>
+
+          <div class="consent-section">
+            <h4>FILLINGS</h4>
+            <p>I understand that care must be exercised in chewing on fillings, especially during the first 24 hours to avoid breakage.</p>
+            <div class="consent-initials">
+              <label>I have read and understood this section</label>
+              <input type="text" name="consent_fillings" placeholder="Initials" maxlength="5" />
+            </div>
+          </div>
+
+          <div class="consent-section">
+            <h4>DENTURES</h4>
+            <p>I understand that wearing dentures can be difficult. Sore spots, altered speech &amp; difficulty in eating are common problems.</p>
+            <div class="consent-initials">
+              <label>I have read and understood this section</label>
+              <input type="text" name="consent_dentures" placeholder="Initials" maxlength="5" />
+            </div>
+          </div>
+
+          <div class="consent-acknowledgment">
+            <h4>PATIENT/GUARDIAN AUTHORIZATION</h4>
+            <div class="consent-checkbox-group">
+              <div class="consent-checkbox">
+                <input type="checkbox" name="consentAck1" id="consentAck1" />
+                <label for="consentAck1">I have read and understood all three pages of this informed consent form</label>
+              </div>
+              <div class="consent-checkbox">
+                <input type="checkbox" name="consentAck2" id="consentAck2" />
+                <label for="consentAck2">I have had the opportunity to ask questions and all my questions have been answered to my satisfaction</label>
+              </div>
+              <div class="consent-checkbox">
+                <input type="checkbox" name="consentAck3" id="consentAck3" />
+                <label for="consentAck3">I understand the risks and benefits of the proposed dental treatment</label>
+              </div>
+              <div class="consent-checkbox">
+                <input type="checkbox" name="consentAck4" id="consentAck4" />
+                <label for="consentAck4">I voluntarily consent to the dental treatment and authorize the dentist to perform necessary procedures</label>
+              </div>
+            </div>
+
+            <div class="consent-signature-section">
+              <label>Patient/Guardian Signature (Type Full Name) *
+                <input type="text" name="consentSignature" placeholder="Type your full name" />
+              </label>
+              <label>Date Signed *
+                <input type="date" name="consentSignedDate" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="submit-row">
+          <button type="button" class="btn alt prev">← Back</button>
+          <button type="submit" class="btn success large"> Submit Complete Form</button>
+        </div>
+      </section>
+
+    </form>
+
+    <div id="message" class="message" aria-live="polite"></div>
+  </main>
+
+  <div id="patientModal" class="patient-modal hidden">
+    <div class="pm-overlay"></div>
+    <div class="pm-panel">
+      <div class="pm-header">
+        <div class="pm-header-content">
+          <div class="pm-photo-wrapper">
+            <img id="pmPhoto" class="pm-photo" src="" alt="Patient" />
+            <div class="pm-photo-overlay">
+              <span>Change Photo</span>
+            </div>
+            <input id="pmPhotoInput" type="file" accept="image/*" />
+          </div>
+          <div class="pm-title-group">
+            <h2 id="pmName">Patient Name</h2>
+            <div id="pmSub">Born: Unknown  0 visits</div>
+          </div>
+        </div>
+        <button id="pmClose" class="pm-close-btn">Close</button>
+      </div>
+
+      <div class="pm-body">
+        <!-- LIST VIEW -->
+        <div id="pmListView" class="pm-view pm-list-view">
+          <div class="view-header">
+            <h3>Patient Information</h3>
+            <div class="view-actions">
+              <button id="pmViewDentalChart" class="btn small">Dental Chart</button>
+              <button id="pmViewTreatmentRecords" class="btn small">Treatment Records</button>
+              <button id="pmViewPatientImages" class="btn small">Patient Images</button>
+              <!-- NEW: Prescriptions button -->
+              <button id="pmViewPrescriptions" class="btn small">Prescriptions</button>
+              <button id="pmPrint" class="btn small warning">Print</button>
+            </div>
+          </div>
+          <div id="pmContent" class="pm-content-scrollable"></div>
+        </div>
+
+        <!-- DETAIL VIEW -->
+        <div id="pmDetailView" class="pm-view pm-detail-view" style="display: none;">
+          <div class="detail-header">
+            <button id="pmBackToList" class="btn small alt">Back</button>
+            <div class="detail-actions">
+              <button id="pmEdit" class="btn small">Edit</button>
+              <button id="pmSave" class="btn small success" style="display: none;">Save</button>
+              <button id="pmCancel" class="btn small alt" style="display: none;">Cancel</button>
+              <button id="pmDelete" class="btn small danger">Delete</button>
+            </div>
+          </div>
+          <div id="pmMessage" class="pm-message"></div>
+          <div id="pmDetailContent" class="pm-content-scrollable"></div>
+        </div>
+
+        <!-- DENTAL CHART VIEW -->
+        <div id="pmDentalChartView" class="pm-view pm-chart-view" style="display: none;">
+          <div class="view-header">
+            <button id="dcBackToList" class="btn small alt">Back</button>
+            <h3>Dental Chart</h3>
+            <div class="view-actions"></div>
+          </div>
+          <div class="chart-layout">
+            <div id="pmDentalChart" class="pm-chart-content"></div>
+            <div class="chart-legend-panel">
+              <div class="legend-section">
+                <h4>Status Box Guide</h4>
+                <ul class="legend-list">
+                  <li>Top box = Restoration/Condition</li>
+                  <li>Bottom box = Surgery</li>
+                  <li>/ = Present (tooth exists)</li>
+                </ul>
+              </div>
+              <div class="legend-section">
+                <h4>Condition Codes</h4>
+                <ul class="legend-list">
+                  
+                  <li><strong>M</strong> – Missing (Caries)</li>
+                  <li><strong>MO</strong> – Missing (Other)</li>
+                  <li><strong>Im</strong> – Impacted</li>
+                  <li><strong>Sp</strong> – Supernumerary</li>
+                  <li><strong>Rf</strong> – Root Fragment</li>
+                  <li><strong>Un</strong> – Unerupted</li>
+                  <li><strong>Am</strong> – Amalgam Filling</li>
+                  <li><strong>Co</strong> – Composite Filling</li>
+                  <li><strong>Jc</strong> – Jacket Crown</li>
+                  <li><strong>Ab</strong> – Abutment</li>
+                  <li><strong>P</strong> – Pontic</li>
+                  <li><strong>In</strong> – Inlay</li>
+                  <li><strong>Imp</strong> – Implant</li>
+                  <li><strong>S</strong> – Sealants</li>
+                  <li><strong>Rm</strong> – Removable Denture</li>
+                </ul>
+              </div>
+              <div class="legend-section">
+                <h4>Surgery Codes</h4>
+                <ul class="legend-list">
+                  <li><strong>D</strong> – Decayed</li>
+                  <li><strong>X</strong> – Extraction (Caries)</li>
+                  <li><strong>XO</strong> – Extraction (Other)</li>
+                </ul>
+              </div>
+              <div class="legend-section">
+                <h4>Tooth Numbers</h4>
+                <ul class="legend-list">
+                  <li>18–11 Upper Right (Perm)</li>
+                  <li>21–28 Upper Left (Perm)</li>
+                  <li>38–31 Lower Left (Perm)</li>
+                  <li>41–48 Lower Right (Perm)</li>
+                  <li>55–51 Upper Right (Primary)</li>
+                  <li>61–65 Upper Left (Primary)</li>
+                  <li>75–71 Lower Left (Primary)</li>
+                  <li>81–85 Lower Right (Primary)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TREATMENT RECORDS VIEW -->
+        <div id="pmTreatmentRecordsView" class="pm-view pm-records-view" style="display: none;">
+          <div class="view-header">
+            <button id="trBackToList" class="btn small alt">Back</button>
+            <h3>Treatment Records</h3>
+            <div class="view-actions">
+              <button id="trAddRecord" class="btn small success">Add Record</button>
+            </div>
+          </div>
+          <div id="pmTreatmentRecords" class="pm-records-content"></div>
+        </div>
+
+        <!-- PATIENT IMAGES VIEW -->
+        <div id="pmPatientImagesView" class="pm-view pm-images-view" style="display: none;">
+          <div class="pi-topbar">
+            <div class="pi-topbar-left">
+              <button id="piBackToList" class="btn small alt">← Back</button>
+              <div class="pi-title-group">
+                <span class="pi-title">Patient Images</span>
+                <span class="pi-count-badge" id="piCountBadge">0 images</span>
+              </div>
+            </div>
+            <div class="pi-topbar-right">
+              <select id="piTagFilter" class="pi-filter-select">
+                <option value="all">All Categories</option>
+                <option value="x-ray">X-Ray</option>
+                <option value="intraoral">Intraoral</option>
+                <option value="extraoral">Extraoral</option>
+                <option value="imaging">Imaging</option>
+                <option value="before-after">Before/After</option>
+                <option value="other">Other</option>
+              </select>
+              <div class="pi-view-toggle">
+                <button id="piGridView" class="pi-view-btn active" title="Grid view">&#9638;</button>
+                <button id="piListView" class="pi-view-btn" title="List view">&#9776;</button>
+              </div>
+              <button id="piUploadBtn" class="btn small success">Upload</button>
+            </div>
+          </div>
+          <div id="pmPatientImages" class="pm-images-content">
+            <div class="images-grid-wrapper">
+              <div id="piImagesGrid" class="images-grid"></div>
+              <div id="piImagesList" class="images-list" style="display: none;"></div>
+              <div id="piNoImages" class="pi-empty" style="display: none;">
+                <div class="pi-empty-icon"></div>
+                <p class="pi-empty-title">No images yet</p>
+                <p class="pi-empty-sub">Upload X-rays, photos, or before/after comparisons</p>
+                <button class="btn small success" onclick="document.getElementById('piUploadBtn').click()">+ Upload First Image</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEW: PRESCRIPTIONS VIEW -->
+        <div id="pmPrescriptionsView" class="pm-view pm-rx-view" style="display: none;">
+          <div class="view-header">
+            <button id="rxBackToList" class="btn small alt">← Back</button>
+            <h3>Prescriptions</h3>
+            <div class="view-actions">
+              <button id="rxAddBtn" class="btn small success">+ New Prescription</button>
+            </div>
+          </div>
+          <div id="pmPrescriptionsContent" class="pm-rx-content"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooth Drawing Modal -->
+  <div id="toothDrawModal" class="tooth-modal hidden" aria-hidden="true">
+    <div class="tm-overlay"></div>
+    <div class="tm-panel">
+      <div class="tm-header">
+        <div class="tm-header-left">
+          <div class="tm-header-icon"></div>
+          <div>
+            <h3 id="tmTitle">Tooth Drawing</h3>
+            <p class="tm-header-sub">Draw annotations on the tooth diagram</p>
+          </div>
+        </div>
+        <button id="tmClose" class="tm-close-btn" title="Close">✕</button>
+      </div>
+      <div class="tm-body">
+
+        <!-- LEFT SIDEBAR: Tools -->
+        <div class="tm-sidebar">
+
+          <!-- Brush Size -->
+          <div class="tm-section">
+            <div class="tm-section-label">Brush Size</div>
+            <div class="tm-brush-row">
+              <input type="range" id="tmBrushSize" min="1" max="20" value="5" class="tm-range" />
+              <span class="tm-brush-badge"><span id="tmBrushSizeValue">5</span>px</span>
+            </div>
+          </div>
+
+          <!-- Basic Colors -->
+          <div class="tm-section">
+            <div class="tm-section-label">Basic Colors</div>
+            <div class="tm-color-palette">
+              <div class="tm-color active" data-color="#e53e3e" style="background:#e53e3e;" title="Red"></div>
+              <div class="tm-color" data-color="#3b82f6" style="background:#3b82f6;" title="Blue"></div>
+              <div class="tm-color" data-color="#10b981" style="background:#10b981;" title="Green"></div>
+              <div class="tm-color" data-color="#f59e0b" style="background:#f59e0b;" title="Orange"></div>
+              <div class="tm-color" data-color="#8b5cf6" style="background:#8b5cf6;" title="Purple"></div>
+              <div class="tm-color" data-color="#0f172a" style="background:#0f172a;" title="Black"></div>
+              <div class="tm-color" data-color="#FFFFFF" style="background:#FFFFFF;border:2px solid #e2e8f0;" title="Eraser (White)"></div>
+            </div>
+          </div>
+
+          <!-- Code Colors: Restoration -->
+          <div class="tm-section">
+            <div class="tm-section-label">
+              Restoration / Condition
+              <span class="tm-section-hint">click = brush · color</span>
+            </div>
+            <div id="tmCodeColors" class="tm-code-colors"></div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: Canvas + Actions -->
+        <div class="tm-main">
+          <div class="tm-canvas-container">
+            <canvas id="toothCanvas" width="380" height="380"></canvas>
+          </div>
+          <div class="tm-actions">
+            <button id="tmUndo" class="tm-action-btn tm-action-undo">
+              Undo
+            </button>
+            <button id="tmSave" class="tm-action-btn tm-action-save">
+              Save Drawing
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Treatment Record Form Modal -->
+  <div id="trFormModal" class="tr-form-modal hidden" aria-hidden="true">
+    <div class="overlay"></div>
+    <div class="panel">
+      <div class="tr-form-header">
+        <h3 id="trFormTitle">Add Treatment Record</h3>
+        <button id="trFormClose" class="btn small alt">Close</button>
+      </div>
+      <form id="trForm">
+        <div class="tr-form-grid">
+          <label>Date *
+            <input type="date" name="date" />
+          </label>
+          <label>Tooth Number
+            <input type="text" name="ToothNo" placeholder="e.g., 11, 21" />
+          </label>
+          <label>Procedure *
+            <input type="text" name="procedure" placeholder="e.g., Filling, Extraction" />
+          </label>
+          <label>Amount Charged
+            <input type="number" name="amountChanged" placeholder="0.00" step="0.01" />
+          </label>
+          <label>Amount Paid
+            <input type="number" name="amountPaid" placeholder="0.00" step="0.01" />
+          </label>
+          <label>Next Appointment
+            <input type="date" name="nextApps" />
+          </label>
+        </div>
+        <label>Notes / Details
+          <textarea name="denticals" rows="3" placeholder="Treatment details, observations..."></textarea>
+        </label>
+        <div class="tr-form-actions">
+          <button type="button" id="trFormCancel" class="btn alt">Cancel</button>
+          <button type="submit" class="btn success">Save Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD TEMPORARY PATIENT MODAL -->
+  <div id="addTempPatientModal" class="tmp-modal hidden" aria-hidden="true">
+    <div class="tmp-overlay"></div>
+    <div class="tmp-panel">
+
+      <!-- Header -->
+      <div class="tmp-header">
+        <div class="tmp-header-left">
+          <div class="tmp-header-icon"></div>
+          <div>
+            <h3>Add Temporary Patient</h3>
+            <p>Walk-in / unregistered patient</p>
+          </div>
+        </div>
+        <button id="addTempPatientClose" class="tmp-close-btn" title="Close">✕</button>
+      </div>
+
+      <!-- Info Banner -->
+      <div class="tmp-banner">
+        <div class="tmp-banner-icon"></div>
+        <p>Temporary patients are added directly to the schedule and <strong>never appear in the Patient List</strong>. They can be converted to full records later.</p>
+      </div>
+
+      <!-- Form -->
+      <form id="addTempPatientForm" autocomplete="off" class="tmp-form">
+
+        <!-- Full Name - full width -->
+        <div class="tmp-field-full">
+          <label class="tmp-label" for="tmp-fullName">
+            <span class="tmp-label-icon"></span>
+            Full Name <span class="tmp-required">*</span>
+          </label>
+          <input id="tmp-fullName" class="tmp-input" type="text" name="fullName" placeholder="e.g. Juan Dela Cruz" />
+        </div>
+
+        <!-- 2-column row -->
+        <div class="tmp-grid">
+          <div class="tmp-field">
+            <label class="tmp-label">
+              <span class="tmp-label-icon"></span>
+              Contact Number
+            </label>
+            <input class="tmp-input" type="text" name="mobileNo" placeholder="e.g. 0917-123-4567" />
+          </div>
+          <div class="tmp-field">
+            <label class="tmp-label">
+              <span class="tmp-label-icon"></span>
+              Appointment Date <span class="tmp-required">*</span>
+            </label>
+            <input class="tmp-input" type="date" name="date" />
+          </div>
+        </div>
+
+        <div class="tmp-grid">
+          <div class="tmp-field">
+            <label class="tmp-label">
+              <span class="tmp-label-icon"></span>
+              Procedure / Reason <span class="tmp-required">*</span>
+            </label>
+            <input class="tmp-input" type="text" name="procedure" placeholder="e.g. Tooth Extraction, Check-up" />
+          </div>
+          <div class="tmp-field">
+            <label class="tmp-label">
+              <span class="tmp-label-icon">💰</span>
+              Amount Charged
+            </label>
+            <div class="tmp-amount-wrap">
+              <span class="tmp-currency">₱</span>
+              <input class="tmp-input tmp-input-amount" type="number" name="amountChanged" placeholder="0.00" step="0.01" min="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes full width -->
+        <div class="tmp-field-full">
+          <label class="tmp-label">
+            <span class="tmp-label-icon"></span>
+            Notes
+          </label>
+          <textarea class="tmp-input tmp-textarea" name="denticals" rows="3" placeholder="Additional notes or observations..."></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="tmp-actions">
+          <button type="button" id="addTempPatientCancel" class="tmp-btn-cancel">Cancel</button>
+          <button type="submit" class="tmp-btn-submit">
+            <span>➕</span> Add to Schedule
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Core globals and utilities -->
+  <script src="/js/globals.js" defer></script>
+  <script src="/js/tooth-status.js" defer></script>
+  <script src="/js/navigation.js" defer></script>
+  <script src="/js/camera.js" defer></script>
+  <script src="/js/form-helpers.js" defer></script>
+  <!-- Admin and patient management -->
+  <script src="/js/admin.js" defer></script>
+  <script src="/js/backup.js" defer></script>
+  <script src="/js/patient-modal.js" defer></script>
+  <!-- Dental chart and tooth drawing -->
+  <script src="/js/dental-chart.js" defer></script>
+  <script src="/js/tooth-drawing.js" defer></script>
+  <!-- Clinical data -->
+  <script src="/js/treatment-records.js" defer></script>
+  <script src="/js/appointments.js" defer></script>
+  <script src="/js/financial.js" defer></script>
+  <script src="/js/billing.js" defer></script>
+  <!-- Features -->
+  <script src="/js/patient-images.js" defer></script>
+  <script src="/js/schedule.js" defer></script>
+  <script src="/js/prescriptions.js" defer></script>
+  <script src="/js/change-password.js" defer></script>
+  <script src="/js/temp-patient.js" defer></script>
+  <!-- Initialization (must load last) -->
+  <script src="/js/init.js" defer></script>
+
+  <!-- Reschedule Modal -->
+  <div id="rescheduleModal" class="modal reschedule-modal hidden" aria-hidden="true">
+    <div class="modal-inner" role="dialog" aria-modal="true">
+      <h3>Reschedule Appointment</h3>
+      <form id="rescheduleForm">
+        <input type="hidden" id="rescheduleApptId" />
+        <input type="hidden" id="reschedulePatientFolder" />
+        <label>New Date *
+          <input type="date" id="rescheduleDate" />
+        </label>
+        <label>New Time
+          <input type="time" id="rescheduleTime" />
+        </label>
+        <label>Reason for Rescheduling
+          <textarea id="rescheduleReason" rows="2" placeholder="Optional notes..."></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" id="rescheduleCancel" class="btn alt">Cancel</button>
+          <button type="submit" class="btn success">Reschedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Unfinished Appointments Popup Modal -->
+  <div id="unfinishedModal" class="modal unfinished-modal hidden" aria-hidden="true">
+    <div class="modal-overlay"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3>Unfinished Appointments</h3>
+        <button id="unfinishedClose" class="btn small alt">Close</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro">The following appointments need attention. You can mark them as done, reschedule, or delete them.</p>
+        <div id="unfinishedList" class="unfinished-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Patient Image Upload Modal -->
+  <div id="piUploadModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-inner" role="dialog" aria-modal="true" style="max-width: 560px;">
+      <h3 id="piUploadModalTitle">Upload Patient Image</h3>
+      <form id="piUploadForm">
+        <div id="piSingleUploadGroup">
+          <div class="form-group">
+            <label>Image File *</label>
+            <input type="file" id="piImageFile" accept="image/*" />
+            <div id="piImagePreview" class="image-preview"></div>
+          </div>
+        </div>
+
+        <div id="piBeforeAfterUploadGroup" style="display:none;">
+          <div class="before-after-upload-grid">
+            <div class="form-group ba-upload-col">
+              <label class="ba-label before-label">BEFORE Image *</label>
+              <input type="file" id="piBeforeImageFile" accept="image/*" />
+              <div id="piBeforeImagePreview" class="image-preview ba-preview"></div>
+            </div>
+            <div class="form-group ba-upload-col">
+              <label class="ba-label after-label">AFTER Image *</label>
+              <input type="file" id="piAfterImageFile" accept="image/*" />
+              <div id="piAfterImagePreview" class="image-preview ba-preview"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Image Tag/Category *</label>
+          <select id="piImageTag">
+            <option value="">Select a category</option>
+            <option value="x-ray">X-Ray</option>
+            <option value="intraoral">Intraoral Photo</option>
+            <option value="extraoral">Extraoral Photo</option>
+            <option value="imaging">Imaging (CBCT, etc.)</option>
+            <option value="before-after">Before/After Comparison</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="piImageNotes" rows="3" placeholder="Add notes about this image..."></textarea>
+        </div>
+
+        <input type="hidden" id="piIsBeforeImage" value="false" />
+        <input type="hidden" id="piAfterImageId" value="" />
+        <div id="piBeforeAfterGroup" style="display:none;"></div>
+        <div id="piAfterImageSelect" style="display:none;"></div>
+
+        <div class="modal-actions">
+          <button type="button" id="piUploadCancel" class="btn alt">Cancel</button>
+          <button type="submit" class="btn success">Upload Image</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Image Comparison Modal (Before/After) -->
+  <div id="piCompareModal" class="pi-compare-modal hidden" aria-hidden="true">
+    <div class="pi-compare-overlay"></div>
+    <div class="pi-compare-panel" role="dialog" aria-modal="true">
+      <div class="pi-compare-header">
+        <div class="pi-compare-header-left">
+          <span class="pi-compare-icon">&#8644;</span>
+          <h3 id="piCompareTitle">Before &amp; After</h3>
+        </div>
+        <button type="button" id="piCompareClose" class="pi-compare-close">&#215;</button>
+      </div>
+      <div class="pi-compare-body">
+        <div class="pi-compare-side">
+          <div class="pi-compare-label before">BEFORE</div>
+          <div class="pi-compare-img-wrap">
+            <img id="piCompareBefore" src="" alt="Before" />
+          </div>
+          <div class="pi-compare-note-block" id="piCompareBeforeBlock">
+            <div class="pi-compare-note-display" id="piCompareBeforeDisplay">
+              <p id="piCompareBeforeNotes" class="pi-compare-notes"></p>
+              <div class="pi-compare-action-btns">
+                <button class="pi-compare-edit-btn" onclick="openCompareNoteEdit('before')">Edit</button>
+                <button class="pi-compare-delete-btn" onclick="deleteCompareSideImage('before')">Delete Pair</button>
+              </div>
+            </div>
+            <div class="pi-compare-note-edit" id="piCompareBeforeEdit" style="display:none;">
+              <textarea id="piCompareBeforeInput" class="pi-compare-note-textarea" rows="2" placeholder="Add notes..."></textarea>
+              <div class="pi-compare-note-actions">
+                <button class="btn small alt" onclick="cancelCompareNoteEdit('before')">Cancel</button>
+                <button class="btn small success" onclick="saveCompareNote('before')">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pi-compare-divider">
+          <div class="pi-compare-arrow">&#8594;</div>
+        </div>
+        <div class="pi-compare-side">
+          <div class="pi-compare-label after">AFTER</div>
+          <div class="pi-compare-img-wrap">
+            <img id="piCompareAfter" src="" alt="After" />
+          </div>
+          <div class="pi-compare-note-block" id="piCompareAfterBlock">
+            <div class="pi-compare-note-display" id="piCompareAfterDisplay">
+              <p id="piCompareAfterNotes" class="pi-compare-notes"></p>
+              <div class="pi-compare-action-btns">
+                <button class="pi-compare-edit-btn" onclick="openCompareNoteEdit('after')">Edit</button>
+                <button class="pi-compare-delete-btn" onclick="deleteCompareSideImage('after')">Delete Pair</button>
+              </div>
+            </div>
+            <div class="pi-compare-note-edit" id="piCompareAfterEdit" style="display:none;">
+              <textarea id="piCompareAfterInput" class="pi-compare-note-textarea" rows="2" placeholder="Add notes..."></textarea>
+              <div class="pi-compare-note-actions">
+                <button class="btn small alt" onclick="cancelCompareNoteEdit('after')">Cancel</button>
+                <button class="btn small success" onclick="saveCompareNote('after')">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Viewer Modal -->
+  <div id="piViewerModal" class="pi-viewer-modal hidden" aria-hidden="true">
+    <div class="pi-viewer-overlay"></div>
+    <div class="pi-viewer-panel" role="dialog" aria-modal="true">
+      <div class="pi-viewer-header">
+        <div class="pi-viewer-header-left">
+          <span class="pi-viewer-tag-badge" id="piViewerTagBadge"></span>
+          <span class="pi-viewer-date" id="piViewerTitle"></span>
+        </div>
+        <button id="piViewerClose" class="pi-viewer-close">&#215;</button>
+      </div>
+      <div class="pi-viewer-img-wrap">
+        <img id="piViewerImage" src="" alt="Full size" />
+      </div>
+      <div class="pi-viewer-footer">
+        <div id="piViewerNotesDisplay" class="pi-viewer-notes-display">
+          <div class="pi-viewer-notes-label">Notes</div>
+          <p id="piViewerNotes" class="pi-viewer-notes-text"></p>
+          <div class="pi-viewer-actions">
+            <button id="piViewerEdit" class="btn small alt">Edit Notes</button>
+            <button id="piViewerDelete" class="btn small danger">Delete</button>
+          </div>
+        </div>
+        <div id="piViewerNotesEdit" class="pi-viewer-notes-edit" style="display:none;">
+          <div class="pi-viewer-notes-label">Edit Notes</div>
+          <textarea id="piViewerNotesInput" class="pi-viewer-notes-textarea" rows="3" placeholder="Add notes about this image..."></textarea>
+          <div class="pi-viewer-edit-actions">
+            <button id="piViewerEditCancel" class="btn small alt">Cancel</button>
+            <button id="piViewerEditSave" class="btn small success">Save Notes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div id="changePasswordModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-inner" role="dialog" aria-modal="true" style="max-width:400px;">
+      <h3>Change Password</h3>
+      <form id="changePasswordForm">
+        <label>Current Password
+          <input type="password" id="cpCurrent" autocomplete="current-password" />
+        </label>
+        <label>New Password <span style="font-size:11px;color:#64748b;">(min. 8 characters)</span>
+          <input type="password" id="cpNew" minlength="8" autocomplete="new-password" />
+        </label>
+        <label>Confirm New Password
+          <input type="password" id="cpConfirm" autocomplete="new-password" />
+        </label>
+        <div id="cpError" class="form-error"></div>
+        <div class="modal-actions">
+          <button type="button" id="cpCancel" class="btn alt">Cancel</button>
+          <button type="submit" class="btn success">Change Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD BILLING RECORD MODAL -->
+  <div id="addBillingModal" class="tr-form-modal hidden" aria-hidden="true">
+    <div class="overlay"></div>
+    <div class="panel">
+      <div class="tr-form-header">
+        <h3 id="addBillingTitle">Add Billing Record</h3>
+        <button id="addBillingClose" class="btn small alt">Close</button>
+      </div>
+      <form id="addBillingForm">
+        <div class="billing-form-patient-row">
+          <label>Patient *</label>
+          <select id="addBillingPatient">
+            <option value="">Select a patient...</option>
+          </select>
+        </div>
+        <div class="tr-form-grid">
+          <div class="billing-form-section-label">Treatment Details</div>
+          <label>Date *
+            <input type="date" name="date" />
+          </label>
+          <label>Tooth Number
+            <input type="text" name="ToothNo" placeholder="e.g., 11, 21" />
+          </label>
+          <label style="grid-column:1/-1;">Procedure *
+            <input type="text" name="procedure" placeholder="e.g., Filling, Extraction" />
+          </label>
+          <div class="billing-form-section-label">Payment</div>
+          <label>Amount Charged
+            <input type="number" name="amountChanged" placeholder="0.00" step="0.01" min="0" />
+          </label>
+          <label>Amount Paid
+            <input type="number" name="amountPaid" placeholder="0.00" step="0.01" min="0" />
+          </label>
+          <label>Next Appointment
+            <input type="date" name="nextApps" />
+          </label>
+        </div>
+        <label>Notes / Details
+          <textarea name="denticals" rows="3" placeholder="Treatment details, observations..."></textarea>
+        </label>
+        <div class="tr-form-actions">
+          <button type="button" id="addBillingCancel" class="btn alt">Cancel</button>
+          <button type="submit" class="btn success">Save Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT BILLING RECORD MODAL -->
+  <div id="editBillingModal" class="tr-form-modal hidden" aria-hidden="true">
+    <div class="overlay"></div>
+    <div class="panel">
+      <div class="tr-form-header">
+        <h3>Edit Billing Record</h3>
+        <button id="editBillingClose" class="btn small alt">Close</button>
+      </div>
+      <form id="editBillingForm">
+        <input type="hidden" id="editBillingRecordId" />
+        <input type="hidden" id="editBillingFolderName" />
+        <div class="tr-form-grid">
+          <div class="billing-form-section-label">Treatment Details</div>
+          <label>Date *
+            <input type="date" name="date" />
+          </label>
+          <label>Tooth Number
+            <input type="text" name="ToothNo" placeholder="e.g., 11, 21" />
+          </label>
+          <label style="grid-column:1/-1;">Procedure *
+            <input type="text" name="procedure" placeholder="e.g., Filling, Extraction" />
+          </label>
+          <div class="billing-form-section-label">Payment</div>
+          <label>Amount Charged
+            <input type="number" name="amountChanged" placeholder="0.00" step="0.01" min="0" />
+          </label>
+          <label>Amount Paid
+            <input type="number" name="amountPaid" placeholder="0.00" step="0.01" min="0" />
+          </label>
+          <label>Next Appointment
+            <input type="date" name="nextApps" />
+          </label>
+        </div>
+        <label>Notes / Details
+          <textarea name="denticals" rows="3" placeholder="Treatment details, observations..."></textarea>
+        </label>
+        <div class="tr-form-actions">
+          <button type="button" id="editBillingCancel" class="btn alt">Cancel</button>
+          <button type="submit" class="btn success">Update Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- BILLING DETAIL MODAL (from appointments list) -->
+  <div id="billingModal" style="
+    display:none; position:fixed; inset:0; z-index:100020;
+    background:rgba(15,23,42,0.78); backdrop-filter:blur(8px);
+    align-items:center; justify-content:center; padding:20px;
+  ">
+    <div style="
+      background:#fff; border-radius:18px; width:100%; max-width:520px;
+      box-shadow:0 30px 90px rgba(0,0,0,0.4); overflow:hidden;
+      animation:slideUp .25s ease;
+    ">
+      <div style="
+        background:linear-gradient(135deg,#0b5ea8,#0b9adf);
+        padding:20px 24px 18px; color:#fff;
+        display:flex; align-items:center; justify-content:space-between;
+      ">
+        <div>
+          <div style="font-size:12px;opacity:.8;text-transform:uppercase;letter-spacing:1px;">Billing Details</div>
+          <h3 style="margin:4px 0 0;font-size:18px;font-weight:700;" id="billingPatientName">Patient</h3>
+        </div>
+        <button id="billingModalClose" style="
+          background:rgba(255,255,255,.2); border:none; color:#fff;
+          border-radius:8px; width:34px; height:34px; font-size:20px;
+          cursor:pointer; display:flex; align-items:center; justify-content:center;
+        ">&times;</button>
+      </div>
+
+      <div style="padding:20px 24px 24px;">
+        <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+          <div style="font-size:12px;color:#64748b;margin-bottom:4px;">Treatment Record</div>
+          <div id="billingRecordInfo" style="font-size:14px;color:#334155;font-weight:600;"></div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div style="font-size:12px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Billing Items</div>
+          <div id="billingItemsTable" style="border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;"></div>
+          <div id="billingNoItems" style="text-align:center;padding:14px;color:#94a3b8;font-size:13px;display:none;">
+            No procedure price found in price list
+          </div>
+        </div>
+
+        <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;color:#0369a1;font-weight:600;">Total Amount</span>
+            <span style="font-size:15px;color:#0b5ea8;font-weight:700;" id="billingTotal">P 0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px;">
+            <label style="font-size:13px;color:#64748b;font-weight:600;flex-shrink:0;">Expenses</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span style="font-size:13px;color:#64748b;">P</span>
+              <input type="number" id="billingExpenses" min="0" step="0.01" placeholder="0"
+                style="width:110px;padding:6px 10px;border:1.5px solid #cbd5e1;border-radius:7px;
+                       font-size:13px;font-family:inherit;outline:none;text-align:right;" />
+              <button id="saveBillingExpenses" style="
+                padding:6px 12px;background:#0b5ea8;color:#fff;border:none;border-radius:7px;
+                font-size:12px;font-weight:600;cursor:pointer;">Save</button>
+            </div>
+          </div>
+          <div style="border-top:1px solid #bae6fd;padding-top:10px;display:flex;justify-content:space-between;">
+            <span style="font-size:14px;color:#0f172a;font-weight:700;">Net Profit</span>
+            <span style="font-size:16px;font-weight:800;" id="billingNetProfit">P 0</span>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div>
+            <span style="font-size:12px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Payment Status</span><br/>
+            <span id="billingPaymentBadge" style="
+              display:inline-block;margin-top:4px;padding:3px 12px;border-radius:20px;
+              font-size:12px;font-weight:700;">Unpaid</span>
+          </div>
+          <button id="billingMarkPaidBtn" style="
+            padding:10px 22px;border-radius:10px;border:none;font-size:14px;font-weight:700;
+            cursor:pointer;transition:all .2s;">Mark as Paid</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ★ NEW: PRESCRIPTION FORM MODAL -->
+  <div id="rxFormModal" class="tr-form-modal hidden" aria-hidden="true">
+    <div class="overlay"></div>
+    <div class="panel" style="max-width:680px;">
+      <div class="tr-form-header">
+        <h3 id="rxFormTitle">New Prescription</h3>
+        <button id="rxFormClose" class="btn small alt">Close</button>
+      </div>
+      <form id="rxForm">
+        <div class="rx-form-grid">
+          <label>Date *
+            <input type="date" name="date" />
+          </label>
+          <label>Prescription #
+            <input type="text" name="rxNumber" placeholder="e.g. RX-2024-001" />
+          </label>
+        </div>
+
+        <div class="rx-drugs-section">
+          <div class="rx-drugs-header">
+            <span class="rx-drugs-label">Medications / Rx</span>
+            <button type="button" id="rxAddDrug" class="btn small success">+ Add Drug</button>
+          </div>
+          <div id="rxDrugsList" class="rx-drugs-list">
+            <!-- Drug rows injected here by JS -->
+          </div>
+        </div>
+
+        <label>Diagnosis / Indication
+          <input type="text" name="diagnosis" placeholder="e.g. Post-extraction pain management" />
+        </label>
+
+        <label>Additional Instructions
+          <textarea name="instructions" rows="3" placeholder="e.g. Take with food. Complete the full course. Avoid alcohol."></textarea>
+        </label>
+
+        <label>Prescribing Dentist
+          <input type="text" name="dentist" placeholder="Dr. Full Name, DMD" />
+        </label>
+
+        <div class="tr-form-actions">
+          <button type="button" id="rxFormCancel" class="btn alt">Cancel</button>
+          <button type="submit" class="btn success">Save Prescription</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>
