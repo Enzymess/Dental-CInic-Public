@@ -8,7 +8,6 @@ CodeBackup/
 patient-images/
 
 # Secrets — NEVER commit these
-dentists.json
 credentials.json
 .env
 *.env
