@@ -49,11 +49,16 @@ if (fsSync.existsSync(LICENSE_PATH)) {
   try {
     license = JSON.parse(fsSync.readFileSync(LICENSE_PATH, 'utf8'))
   } catch (e) {
-    console.warn('⚠  Could not read license.json, using default (version 4 full).')
+    console.warn('Could not read license.json, using defaults.')
   }
 } else {
-  console.warn('⚠  license.json not found. Run: node setup.js admin:admin123:4')
-  console.warn('   Defaulting to version 4 (all features, home network).')
+  // Auto-create on Railway or fresh deploy — no setup.js needed
+  try {
+    fsSync.writeFileSync(LICENSE_PATH, JSON.stringify(license, null, 2), 'utf8')
+    console.log('Created default license.json (version 4, all features)')
+  } catch (e) {
+    console.warn('Could not write license.json:', e.message)
+  }
 }
 
 // Expose license globally so route files can read feature flags if needed
@@ -102,7 +107,6 @@ app.get('/', (req, res) => {
  */
 if (require.main === module) {
   const PORT = process.env.PORT || 3000
-  // On Railway always bind 0.0.0.0; locally use license.host
   const HOST = process.env.RAILWAY_ENVIRONMENT ? '0.0.0.0' : (license.host || '0.0.0.0')
 
   app.listen(PORT, HOST, () => {
