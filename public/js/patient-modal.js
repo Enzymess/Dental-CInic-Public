@@ -39,7 +39,8 @@ function openPatientModal(group) {
   pmSub.textContent = `Born: ${group.birthdate || 'Unknown'}  ${group.appointments.length} visit${group.appointments.length !== 1 ? 's' : ''}`;
 
   if (group.photoPath) {
-    pmPhoto.src = group.photoPath;
+    // Cache-bust so the latest uploaded photo always shows, never the browser's cached version
+    pmPhoto.src = group.photoPath + '?t=' + Date.now();
     pmPhoto.style.display = 'block';
     pmPhoto.style.width = '100%';
     pmPhoto.style.height = '100%';
@@ -656,6 +657,8 @@ async function savePatientChanges(container, group) {
   });
 
   try {
+    pmMessage.textContent = 'Saving changes...';
+
     const res = await authFetch(`/update/${encodeURIComponent(latestAppt._id)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -669,7 +672,8 @@ async function savePatientChanges(container, group) {
       group.appointments[idx] = updatedData;
     }
 
-    // saved silently
+    pmMessage.textContent = '/ Changes saved successfully!';
+    setTimeout(() => pmMessage.textContent = '', 3000);
 
     populatePatientInfo(group);
 
@@ -910,6 +914,9 @@ async function saveAppointmentChanges() {
   if (!currentAppointment || !currentAppointment._id) return;
 
   try {
+    pmMessage.textContent = 'Saving changes...';
+    pmMessage.className = 'pm-message';
+
     const res = await authFetch(`/update/${encodeURIComponent(currentAppointment._id)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -918,7 +925,7 @@ async function saveAppointmentChanges() {
 
     if (!res.ok) throw new Error('Save failed');
 
-    // saved silently
+    pmMessage.textContent = 'Changes saved successfully!';
     pmOriginalData = JSON.parse(JSON.stringify(currentAppointment));
 
     await loadPatients();

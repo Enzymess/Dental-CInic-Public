@@ -9,6 +9,11 @@ window.pdaFeatures = null;
 /* ── Feature → DOM element map ──────────────────────────── */
 // Each entry: { feature: 'flagName', selectors: ['#id', ...] }
 const FEATURE_GATE = [
+  // Financial summary row on dashboard
+  {
+    feature: 'financialSummary',
+    selectors: ['.dash-fin-row']
+  },
   // Dashboard nav + view
   {
     feature: 'dashboard',
@@ -60,20 +65,14 @@ async function loadLicense() {
     console.log(`PDA License: v${data.version} — ${data.label}`);
   } catch (err) {
     console.warn('Could not load license, enabling all features:', err);
-    // Safe fallback — show everything
     window.pdaFeatures = {
       patientForm: true, patientList: true, dentalChart: true,
       dentalRecords: true, print: true, dashboard: true,
       billing: true, scheduling: true, patientImages: true,
-      prescriptions: true
+      prescriptions: true, financialSummary: true
     };
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyFeatureGates);
-  } else {
-    applyFeatureGates();
-  }
+  applyFeatureGates();
 }
 
 function applyFeatureGates() {
@@ -112,5 +111,4 @@ function applyFeatureGates() {
   }
 }
 
-// Run immediately on script load
-loadLicense();
+// loadLicense() is called from init.js DOMContentLoaded — do not auto-call here

@@ -32,109 +32,13 @@ function hideLoginModal() {
   }
 }
 
-/* =========================================================
-   DENTIST LOGIN SCREEN
-   ========================================================= */
-function initDentistLoginScreen() {
-  const screen  = document.getElementById('dentistLoginScreen');
-  const loginFm = document.getElementById('dentistLoginForm');
-  const form    = document.getElementById('dentalForm');
-  if (!screen || !loginFm || !form) return;
+document.addEventListener('DOMContentLoaded', async () => {
 
-  // Hide form until dentist signs in
-  form.style.display   = 'none';
-  screen.style.display = 'flex';
-
-  loginFm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errEl = document.getElementById('dlsError');
-    errEl.style.display = 'none';
-    errEl.textContent   = '';
-
-    const username = document.getElementById('dlsUsername').value.trim();
-    const password = document.getElementById('dlsPassword').value;
-
-    if (!username || !password) {
-      errEl.textContent   = 'Please enter your username and password.';
-      errEl.style.display = 'block';
-      return;
-    }
-
-    const btn = loginFm.querySelector('.dls-btn');
-    btn.disabled    = true;
-    btn.textContent = 'Signing in…';
-
-    try {
-      const res  = await fetch('/login', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ username, password })
-      });
-      const body = await res.json();
-
-      if (!res.ok || !body.ok) {
-        errEl.textContent   = body.error || 'Invalid username or password.';
-        errEl.style.display = 'block';
-        return;
-      }
-
-      // Store dentist session
-      selectedDentistId      = body.dentistId   || null;
-      selectedDentistName    = body.dentistName || username;
-      selectedDentistRole    = body.role        || 'dentist';
-      selectedDentistVersion = body.version     || 4;
-      adminToken = body.token;
-      sessionStorage.setItem('pdaToken',       body.token);
-      sessionStorage.setItem('pdaDentistId',   body.dentistId   || '');
-      sessionStorage.setItem('pdaDentistName', body.dentistName || '');
-      sessionStorage.setItem('pdaRole',        body.role        || 'dentist');
-      sessionStorage.setItem('pdaVersion',     body.version     || 4);
-
-      screen.style.display = 'none';
-      form.style.display   = '';
-      showDentistFormBanner(selectedDentistName || username);
-
-    } catch (err) {
-      console.error('Login error:', err);
-      errEl.textContent   = 'Login failed. Please try again.';
-      errEl.style.display = 'block';
-    } finally {
-      btn.disabled    = false;
-      btn.textContent = 'Sign In';
-    }
-  });
-}
-
-function showDentistFormBanner(name) {
-  document.getElementById('dentistFormBanner')?.remove();
-  const banner = document.createElement('div');
-  banner.id        = 'dentistFormBanner';
-  banner.className = 'dentist-form-banner';
-  banner.innerHTML = `
-    <span class="dfb-label">Signed in as:</span>
-    <span class="dfb-name">${name}</span>
-    <button class="dfb-signout" id="dfbSignout" type="button">Sign Out</button>
-  `;
-  document.getElementById('dentalForm')?.insertAdjacentElement('beforebegin', banner);
-  document.getElementById('dfbSignout')?.addEventListener('click', () => {
-    banner.remove();
-    selectedDentistId = null; selectedDentistName = null;
-    selectedDentistRole = null; selectedDentistVersion = 4;
-    adminToken = null;
-    sessionStorage.clear();
-    const f = document.getElementById('dentalForm');
-    const s = document.getElementById('dentistLoginScreen');
-    if (f) f.style.display = 'none';
-    if (s) s.style.display = 'flex';
-    document.getElementById('dlsUsername').value = '';
-    document.getElementById('dlsPassword').value = '';
-    document.getElementById('dlsError').style.display = 'none';
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-
-  initDentistLoginScreen();
+  // Load license (feature gates) and clinic branding first — both are fast public fetches
+  await Promise.all([
+    typeof loadLicense      === 'function' ? loadLicense()      : Promise.resolve(),
+    typeof loadClinicConfig === 'function' ? loadClinicConfig() : Promise.resolve()
+  ]);
 
   showPage(0);
   if (adminPanel) adminPanel.classList.add('hidden');
@@ -249,13 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       adminToken = body.token
-      sessionStorage.setItem('pdaToken',       body.token)
-      sessionStorage.setItem('pdaDentistId',   body.dentistId   || '')
-      sessionStorage.setItem('pdaDentistName', body.dentistName || '')
-      sessionStorage.setItem('pdaRole',        body.role        || 'admin')
-      sessionStorage.setItem('pdaVersion',     body.version     || 4)
+      sessionStorage.setItem('pdaToken', body.token)
       hideLoginModal();
-      await loadClinicConfig();
       showAdminPanel();
     } catch (err) {
       console.error(err);
@@ -266,10 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
   adminLogout?.addEventListener('click', () => {
     adminToken = null
     sessionStorage.removeItem('pdaToken')
-    sessionStorage.removeItem('pdaDentistId')
-    sessionStorage.removeItem('pdaDentistName')
-    sessionStorage.removeItem('pdaRole')
-    sessionStorage.removeItem('pdaVersion')
     hideAdminPanel()
   });
 
@@ -507,9 +402,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const payload = collectFormData(form);
     payload._submittedAt = new Date().toISOString();
-    // Attach dentist to patient record
-    if (selectedDentistId)   payload.attendingDentistId = selectedDentistId;
-    if (selectedDentistName) payload.attendingDentist   = selectedDentistName;
 
     const editingId = form.dataset.editingId;
     
@@ -540,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (!res.ok) throw new Error('Update failed');
       } else {
-        res = await authFetch('/submit', {
+        res = await fetch('/submit', {
           method: 'POST',
           body: capturedPhotoData ? formData : JSON.stringify(payload),
           headers: capturedPhotoData ? {} : { 'Content-Type': 'application/json' }

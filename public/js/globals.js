@@ -354,9 +354,3 @@ let appointmentsRefreshInterval = null;
 // Dental Chart Clinical State
 let dentalChartClinicalData = {};
 
-
-// ── Dentist session state ────────────────────────────────────────────────────
-let selectedDentistId      = null;
-let selectedDentistName    = null;
-let selectedDentistRole    = null;
-let selectedDentistVersion = 4;

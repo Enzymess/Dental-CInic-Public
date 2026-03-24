@@ -20,29 +20,13 @@ const path      = require('path')
  * =======================
  * Define absolute paths to all persistent data directories used by the application
  */
-// DATA_DIR lets Railway point to a persistent volume (/data)
-// Locally defaults to project root — no change needed
-const dataDir        = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.resolve(__dirname, '../../')
-const patientsDir    = path.join(dataDir, 'patients')
-const filesDir       = path.join(dataDir, 'Files')
-const backupDir      = path.join(dataDir, 'Backup')
-const codeBackupDir  = path.join(dataDir, 'CodeBackup')
+const patientsDir    = path.resolve(__dirname, '../../patients')
+const filesDir       = path.resolve(__dirname, '../../Files')
+const backupDir      = path.resolve(__dirname, '../../Backup')
+const codeBackupDir  = path.resolve(__dirname, '../../CodeBackup')
 const teethBaseDir   = path.join(filesDir, 'teeth_base')
-const imagesDir      = path.join(dataDir, 'patient-images')
-const credentialsPath = path.join(dataDir, 'credentials.json')
-const dentistsPath    = path.join(dataDir, 'dentists.json')
-
-function loadDentists() {
-  try {
-    if (fsSync.existsSync(dentistsPath))
-      return JSON.parse(fsSync.readFileSync(dentistsPath, 'utf8'))
-  } catch (e) { console.error('dentists.json error:', e.message) }
-  return []
-}
-
-function saveDentists(list) {
-  fsSync.writeFileSync(dentistsPath, JSON.stringify(list, null, 2), 'utf8')
-}
+const imagesDir      = path.join(__dirname, '../../patient-images')
+const credentialsPath = path.join(__dirname, '../../credentials.json')
 
 /**
  * ENSURE DIRECTORY STRUCTURE
@@ -102,7 +86,7 @@ if (!fsSync.existsSync(credentialsPath)) {
  * 
  * Note: For production, consider using a persistent session store or database.
  */
-const activeTokens = new Map() // token -> { username, dentistId, dentistName, role, version, createdAt }
+const activeTokens = new Map()
 
 /**
  * EXPRESS APPLICATION INITIALIZATION
@@ -134,8 +118,5 @@ module.exports = {
   credentialsPath,
   loadCredentials,
   saveCredentials,
-  activeTokens,
-  dentistsPath,
-  loadDentists,
-  saveDentists
+  activeTokens
 }

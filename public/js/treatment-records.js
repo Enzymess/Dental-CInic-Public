@@ -73,8 +73,13 @@ function renderTreatmentRecords(records, container) {
     const dateStr = r.date
       ? new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
       : 'No date';
-    const timeStr = r.appointmentTime
-      ? (() => { const [h, m] = r.appointmentTime.split(':'); const hr = parseInt(h); return `${hr % 12 || 12}:${m} ${hr < 12 ? 'AM' : 'PM'}`; })()
+
+    const timeStr = r.apptTime
+      ? (() => {
+          const [h, m] = r.apptTime.split(':');
+          const hr = parseInt(h, 10);
+          return `${hr % 12 || 12}:${m} ${hr >= 12 ? 'PM' : 'AM'}`;
+        })()
       : '';
 
     const rowClass = isPaid ? 'tr-card paid' : hasBalance ? 'tr-card unpaid' : 'tr-card no-charge';
@@ -88,7 +93,8 @@ function renderTreatmentRecords(records, container) {
         <div class="tr-card-body">
           <div class="tr-card-top">
             <div class="tr-card-meta">
-              <span class="tr-card-date">${dateStr}${timeStr ? ' &nbsp;' + timeStr : ''}</span>
+              <span class="tr-card-date">${dateStr}</span>
+              ${timeStr ? `<span class="tr-card-time">${timeStr}</span>` : ''}
               ${toothHtml}
               ${payStatus}
             </div>
@@ -163,7 +169,7 @@ function openTreatmentRecordForm(record = null) {
   if (record) {
     trFormTitle.textContent = 'Edit Treatment Record';
     trForm.querySelector('[name="date"]').value = record.date || '';
-    trForm.querySelector('[name="appointmentTime"]').value = record.appointmentTime || '';
+    trForm.querySelector('[name="apptTime"]').value = record.apptTime || '';
     trForm.querySelector('[name="ToothNo"]').value = record.ToothNo || '';
     trForm.querySelector('[name="procedure"]').value = record.procedure || '';
     trForm.querySelector('[name="denticals"]').value = record.denticals || '';
@@ -192,14 +198,14 @@ async function saveTreatmentRecord(e) {
 
   const formData = new FormData(trForm);
   const recordData = {
-    date:            formData.get('date'),
-    appointmentTime: formData.get('appointmentTime') || '',
-    ToothNo:         formData.get('ToothNo'),
-    procedure:       formData.get('procedure'),
-    denticals:       formData.get('denticals'),
-    amountChanged:   formData.get('amountChanged'),
-    amountPaid:      formData.get('amountPaid'),
-    nextApps:        formData.get('nextApps')
+    date: formData.get('date'),
+    apptTime: formData.get('apptTime') || '',
+    ToothNo: formData.get('ToothNo'),
+    procedure: formData.get('procedure'),
+    denticals: formData.get('denticals'),
+    amountChanged: formData.get('amountChanged'),
+    amountPaid: formData.get('amountPaid'),
+    nextApps: formData.get('nextApps')
   };
 
   try {

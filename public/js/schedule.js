@@ -179,13 +179,11 @@ function renderScheduleList() {
   if (scheduleFilter === 'finished') records = records.filter(r =>  r._completed);
 
   records.sort((a, b) => {
-    const da = new Date(a.date || a._timestamp || 0);
-    const db = new Date(b.date || b._timestamp || 0);
-    if (da - db !== 0) return da - db;
-    // Same date — sort by appointmentTime
-    const ta = a.appointmentTime || '99:99';
-    const tb = b.appointmentTime || '99:99';
-    return ta.localeCompare(tb);
+    const diff = new Date(a.date || a._timestamp || 0) - new Date(b.date || b._timestamp || 0);
+    if (diff !== 0) return diff;
+    const tA = a.apptTime || '99:99';
+    const tB = b.apptTime || '99:99';
+    return tA.localeCompare(tB);
   });
 
   renderAppointmentCards(records, container);
@@ -208,6 +206,13 @@ function renderAppointmentCards(records, container) {
   records.forEach(rec => {
     const apptDate    = rec.date ? new Date(rec.date) : new Date(rec._timestamp || 0);
     const dateStr     = apptDate.toLocaleDateString();
+    const timeStr     = rec.apptTime
+      ? (() => {
+          const [h, m] = rec.apptTime.split(':');
+          const hr = parseInt(h, 10);
+          return `${hr % 12 || 12}:${m} ${hr >= 12 ? 'PM' : 'AM'}`;
+        })()
+      : '';
     const isCompleted = rec._completed || false;
     const isFollowUp  = !!(rec.denticals && rec.denticals.startsWith('Follow-up from'));
     const isTemp      = !!rec._isTemp;
@@ -236,14 +241,16 @@ function renderAppointmentCards(records, container) {
     recEl.dataset.recId = rec.id;
     recEl.innerHTML = `
       <div class="appt-time">
-        <span class="date">${dateStr}</span>
-        ${rec.appointmentTime ? `<span class="appt-clock">${(h => `${h % 12 || 12}:${rec.appointmentTime.split(':')[1]} ${h < 12 ? 'AM' : 'PM'}`)(parseInt(rec.appointmentTime.split(':')[0]))}</span>` : ''}
+        ${timeStr
+          ? `<span class="time">${timeStr}</span><span class="date">${dateStr}</span>`
+          : `<span class="time-no-appt">No time</span><span class="date">${dateStr}</span>`
+        }
         ${toothNo ? `<span class="appt-tooth">${toothNo}</span>` : ''}
       </div>
       <div class="appt-patient-col">${photoHtml}</div>
       <div class="appt-info">
         <h4>${rec._patientName || 'Unknown Patient'}${followUpBadge}${tempBadge}</h4>
-        <p>${isTemp && rec.attendingDentist ? '<span class="appt-dentist">Dr: ' + rec.attendingDentist + '</span>' : contact}</p>
+        <p>${contact}</p>
         <div class="reason">${procedure}</div>
         ${rec.nextApps && rec._completed
           ? `<div class="appt-next">Next appt: ${new Date(rec.nextApps).toLocaleDateString()}</div>`

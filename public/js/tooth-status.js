@@ -456,7 +456,8 @@ function buildToothCol(num, isTemp, position) {
 }
 
 function getBoxState(code, boxType) {
-  if (code === '/')  return 'present';
+  const option = ALL_CODE_OPTIONS.find(o => o.code === code);
+  if (option && option.state) return option.state;
   if (boxType === 'bottom') return 'surgery';
   return 'condition';
 }

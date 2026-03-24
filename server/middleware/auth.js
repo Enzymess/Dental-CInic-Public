@@ -1,31 +1,40 @@
 /**
  * AUTHENTICATION MIDDLEWARE
  * =========================
- * Provides requireAuth middleware to protect routes.
- * Usage: router.get('/protected', requireAuth, handler)
+ * 
+ * This module provides Express middleware to protect routes from unauthorized access.
+ * It validates JWT tokens that are passed in the Authorization header.
+ * 
+ * Usage:
+ *   router.get('/protected-route', requireAuth, (req, res) => { ... })
+ * 
+ * Expected header format:
+ *   Authorization: Bearer <token>
  */
 
 'use strict'
 
 const { activeTokens } = require('../config')
 
-const TOKEN_MAX_AGE_MS = 8 * 60 * 60 * 1000 // 8 hours
-
+/**
+ * REQUIRE AUTHENTICATION MIDDLEWARE
+ * ==================================
+ * 
+ * Validates that the request includes a valid Bearer token in the Authorization header.
+ * If the token is missing or invalid, returns a 401 Unauthorized response.
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * 
+ * @returns Calls next() if token is valid, or sends 401 response if invalid
+ */
 function requireAuth(req, res, next) {
   const authHeader = req.headers['authorization'] || ''
   const token = authHeader.replace(/^Bearer\s+/i, '').trim()
-
   if (!token || !activeTokens.has(token)) {
     return res.status(401).json({ ok: false, error: 'Unauthorized' })
   }
-
-  // Token expiry check
-  const td = activeTokens.get(token)
-  if (Date.now() - td.createdAt > TOKEN_MAX_AGE_MS) {
-    activeTokens.delete(token)
-    return res.status(401).json({ ok: false, error: 'Session expired. Please log in again.' })
-  }
-
   next()
 }
 

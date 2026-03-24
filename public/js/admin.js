@@ -2,19 +2,11 @@
    ADMIN PANEL FUNCTIONS
    ========================================================= */
 async function showAdminPanel() {
+  // Restore token from session if page was refreshed
   if (!adminToken) adminToken = sessionStorage.getItem('pdaToken')
   adminPanel.classList.remove('hidden');
   adminPanel.setAttribute('aria-hidden', 'false');
   form.style.display = 'none';
-
-  // Show logged-in dentist/admin name in sidebar
-  const dn     = sessionStorage.getItem('pdaDentistName') || '';
-  const rl     = sessionStorage.getItem('pdaRole') || 'admin';
-  const banner = document.getElementById('adminLoggedInAs');
-  if (banner) {
-    banner.textContent = dn ? `Logged in as: ${dn}` : 'Logged in as: Admin';
-    banner.className   = `admin-logged-as ${rl}`;
-  }
 
   await loadPatients();
   startAppointmentsRefresh();

@@ -2,8 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PDA Dental Chart — Patient Information Record</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>PDA Dental Clinic</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#0b5ea8" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PDA Dental" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
@@ -16,7 +26,10 @@
           <div class="sub">Patient Information &amp; Consent Form System</div>
         </div>
       </div>
-      <button id="adminBtn" class="admin-btn"> Admin Portal</button>
+      <div class="topbar-actions">
+        <button id="patientPortalBtn" class="patient-portal-btn">My Record</button>
+        <button id="adminBtn" class="admin-btn"> Admin Portal</button>
+      </div>
     </div>
 
     <aside id="adminPanel" class="admin-panel hidden" aria-hidden="true">
@@ -54,7 +67,6 @@
           <button id="createBackup" class="dash-sidebar-action">
             Backup
           </button>
-          <div id="adminLoggedInAs" class="admin-logged-as"></div>
           <button id="adminLogout" class="dash-sidebar-action danger">
             Logout
           </button>
@@ -167,6 +179,7 @@
               <button id="schedTodayBtn" class="btn small">Today</button>
               <button id="schedNextMonth" class="btn small alt">Next &rsaquo;</button>
               <button id="refreshSchedule" class="btn small">Refresh</button>
+              <button id="addTempPatientBtn" class="btn small success">+ Temp Patient</button>
             </div>
           </div>
 
@@ -188,7 +201,6 @@
             <div class="dash-section-header">
               <h3 id="schedDayTitle">Appointments</h3>
               <div style="display:flex;gap:8px;align-items:center;">
-                <button id="addTempPatientBtn" class="btn small success">+ Add Temporary Patient</button>
                 <button id="schedDayClose" class="btn small alt">Close</button>
               </div>
             </div>
@@ -310,25 +322,140 @@
       </div>
     </div>
 
-    <!-- Dentist Login Screen — shown before patient form -->
-    <div id="dentistLoginScreen" class="dls-overlay" style="display:none;">
-      <div class="dls-card">
-        <div class="dls-logo">EZ</div>
-        <h2 class="dls-title">Enzymess Dental</h2>
-        <p class="dls-sub">Sign in to begin patient intake</p>
-        <form id="dentistLoginForm" class="dls-form" autocomplete="off">
-          <div class="dls-field">
-            <label class="dls-label" for="dlsUsername">Username</label>
-            <input id="dlsUsername" type="text" class="dls-input" placeholder="Enter username" autocomplete="username" />
+    <!-- Patient Login Modal -->
+    <div id="patientLoginModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-inner pp-login-inner" role="dialog" aria-modal="true">
+        <div class="pp-login-header">
+          <div class="pp-login-icon">👤</div>
+          <h3>Patient Portal</h3>
+          <p>Access and update your personal information</p>
+        </div>
+        <form id="patientLoginForm" autocomplete="off">
+          <label>Last Name
+            <input name="lastName" type="text" placeholder="e.g. Dela Cruz" autocomplete="off" />
+          </label>
+          <label>First Name
+            <input name="firstName" type="text" placeholder="e.g. Juan" autocomplete="off" />
+          </label>
+          <label>
+            Password
+            <span class="pp-pass-hint">(Your birthdate: YYYY-MM-DD)</span>
+            <input name="password" type="password" placeholder="e.g. 1990-05-15" autocomplete="off" />
+          </label>
+          <div class="modal-actions">
+            <button type="button" id="patientLoginCancel" class="btn alt">Cancel</button>
+            <button type="submit" class="btn">Login</button>
           </div>
-          <div class="dls-field">
-            <label class="dls-label" for="dlsPassword">Password</label>
-            <input id="dlsPassword" type="password" class="dls-input" placeholder="Enter password" autocomplete="current-password" />
-          </div>
-          <div id="dlsError" class="dls-error" style="display:none;"></div>
-          <button type="submit" class="dls-btn">Sign In</button>
+          <div id="patientLoginError" class="form-error"></div>
         </form>
-        <p class="dls-hint">Patients — ask your dentist to sign in for you.</p>
+      </div>
+    </div>
+
+    <!-- Patient Portal Panel -->
+    <div id="patientPortalPanel" class="patient-portal-panel hidden" aria-hidden="true">
+      <div class="pp-overlay"></div>
+      <div class="pp-panel">
+
+        <!-- Header -->
+        <div class="pp-header">
+          <div class="pp-header-left">
+            <div class="pp-avatar" id="ppAvatar">?</div>
+            <div>
+              <h2 id="ppPatientName">My Record</h2>
+              <p id="ppPatientSub">Patient Portal</p>
+            </div>
+          </div>
+          <button id="ppClose" class="pp-close-btn">Close</button>
+        </div>
+
+        <!-- Body -->
+        <div class="pp-body">
+
+          <div class="pp-notice">
+            <span class="pp-notice-icon">ℹ️</span>
+            You can update your personal information below. Medical history and dental records can only be updated by clinic staff.
+          </div>
+
+          <form id="ppEditForm" autocomplete="off">
+
+            <div class="pp-section-title">Personal Information</div>
+            <div class="pp-grid">
+              <label class="pp-label">Last Name
+                <input class="pp-input" name="lastName" type="text" />
+              </label>
+              <label class="pp-label">First Name
+                <input class="pp-input" name="firstName" type="text" />
+              </label>
+              <label class="pp-label">Middle Name
+                <input class="pp-input" name="middleName" type="text" />
+              </label>
+              <label class="pp-label">Nickname
+                <input class="pp-input" name="nickname" type="text" />
+              </label>
+              <label class="pp-label">Birthdate
+                <input class="pp-input" name="birthdate" type="date" />
+              </label>
+              <label class="pp-label">Age
+                <input class="pp-input" name="age" type="number" min="0" />
+              </label>
+              <label class="pp-label">Sex
+                <select class="pp-input" name="sex">
+                  <option value="">Select</option>
+                  <option value="M">Male</option>
+                  <option value="F">Female</option>
+                </select>
+              </label>
+              <label class="pp-label">Nationality
+                <input class="pp-input" name="nationality" type="text" />
+              </label>
+              <label class="pp-label">Religion
+                <input class="pp-input" name="religion" type="text" />
+              </label>
+              <label class="pp-label">Occupation
+                <input class="pp-input" name="occupation" type="text" />
+              </label>
+            </div>
+
+            <div class="pp-section-title">Contact Information</div>
+            <div class="pp-grid">
+              <label class="pp-label pp-full">Home Address
+                <input class="pp-input" name="homeAddress" type="text" />
+              </label>
+              <label class="pp-label">Mobile Number
+                <input class="pp-input" name="mobileNo" type="tel" />
+              </label>
+              <label class="pp-label">Email Address
+                <input class="pp-input" name="email" type="email" />
+              </label>
+              <label class="pp-label">Home Phone
+                <input class="pp-input" name="homeNo" type="tel" />
+              </label>
+              <label class="pp-label">Office Phone
+                <input class="pp-input" name="officeNo" type="tel" />
+              </label>
+            </div>
+
+            <div class="pp-section-title">Guardian Information <span class="pp-section-sub">(for minors)</span></div>
+            <div class="pp-grid">
+              <label class="pp-label">Guardian Name
+                <input class="pp-input" name="guardianName" type="text" />
+              </label>
+              <label class="pp-label">Guardian Contact
+                <input class="pp-input" name="guardianContact" type="tel" />
+              </label>
+              <label class="pp-label">Guardian Occupation
+                <input class="pp-input" name="guardianOccupation" type="text" />
+              </label>
+            </div>
+
+            <div class="pp-actions">
+              <div id="ppMessage" class="pp-message"></div>
+              <button type="button" id="ppCancelBtn" class="btn alt">Cancel</button>
+              <button type="submit" class="btn success">Save Changes</button>
+            </div>
+
+          </form>
+        </div>
       </div>
     </div>
 
@@ -1250,10 +1377,11 @@
     </div>
   </div>
 
-  <!-- License / feature gating (loads before everything else) -->
-  <script src="/js/license.js" defer></script>
   <!-- Core globals and utilities -->
   <script src="/js/globals.js" defer></script>
+  <!-- License/feature gating + clinic branding — must come after globals.js (needs authFetch) -->
+  <script src="/js/license.js" defer></script>
+  <script src="/js/clinic-config.js" defer></script>
   <script src="/js/tooth-status.js" defer></script>
   <script src="/js/navigation.js" defer></script>
   <script src="/js/camera.js" defer></script>
@@ -1276,7 +1404,7 @@
   <script src="/js/prescriptions.js" defer></script>
   <script src="/js/change-password.js" defer></script>
   <script src="/js/temp-patient.js" defer></script>
-  <script src="/js/clinic-config.js" defer></script>
+  <script src="/js/patient-portal.js" defer></script>
   <!-- Initialization (must load last) -->
   <script src="/js/init.js" defer></script>
 
@@ -1717,5 +1845,10 @@
     </div>
   </div>
 
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>

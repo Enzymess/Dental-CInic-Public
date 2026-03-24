@@ -45,7 +45,11 @@ async function loadAppointments(silent = false) {
     filtered.sort((a, b) => {
       const dateA = new Date(a.date || a._timestamp || 0);
       const dateB = new Date(b.date || b._timestamp || 0);
-      return dateB - dateA;
+      if (dateB - dateA !== 0) return dateB - dateA;
+      // Same date — sort by time
+      const tA = a.apptTime || '99:99';
+      const tB = b.apptTime || '99:99';
+      return tA.localeCompare(tB);
     });
 
     renderAppointments(filtered);
@@ -111,6 +115,13 @@ function renderAppointments(records) {
   records.forEach(rec => {
     const apptDate = rec.date ? new Date(rec.date) : new Date(rec._timestamp || 0);
     const dateStr = apptDate.toLocaleDateString();
+    const timeStr = rec.apptTime
+      ? (() => {
+          const [h, m] = rec.apptTime.split(':');
+          const hr = parseInt(h, 10);
+          return `${hr % 12 || 12}:${m} ${hr >= 12 ? 'PM' : 'AM'}`;
+        })()
+      : '';
     const isCompleted = rec._completed || false;
     const isFollowUp = !!(rec.denticals && rec.denticals.startsWith('Follow-up from'));
     const statusClass = isCompleted ? 'finished' : 'pending';
@@ -138,7 +149,10 @@ function renderAppointments(records) {
 
     recEl.innerHTML = `
       <div class="appt-time">
-        <span class="date">${dateStr}</span>
+        ${timeStr
+          ? `<span class="time">${timeStr}</span><span class="date">${dateStr}</span>`
+          : `<span class="time-no-appt">No time</span><span class="date">${dateStr}</span>`
+        }
         ${toothNo ? `<span class="appt-tooth">${toothNo}</span>` : ''}
       </div>
       <div class="appt-patient-col">
@@ -340,6 +354,7 @@ function openTreatmentRescheduleModal(rec) {
 
   const todayStr = new Date().toISOString().split('T')[0];
   const existingDate = rec.date ? rec.date.split('T')[0] : todayStr;
+  const existingTime = rec.apptTime || '';
 
   const modal = document.createElement('div');
   modal.id = 'trRescheduleModal';
@@ -370,6 +385,18 @@ function openTreatmentRescheduleModal(rec) {
         id="trRescheduleDate"
         value="${existingDate}"
         style="width:100%;padding:10px 14px;border:2px solid #cbd5e1;border-radius:8px;
+               font-size:14px;box-sizing:border-box;margin-bottom:14px;outline:none;
+               font-family:inherit;color:#0f1724;"
+      />
+
+      <label style="display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px;">
+        Appointment Time
+      </label>
+      <input
+        type="time"
+        id="trRescheduleTime"
+        value="${existingTime}"
+        style="width:100%;padding:10px 14px;border:2px solid #cbd5e1;border-radius:8px;
                font-size:14px;box-sizing:border-box;margin-bottom:8px;outline:none;
                font-family:inherit;color:#0f1724;"
       />
@@ -397,6 +424,7 @@ function openTreatmentRescheduleModal(rec) {
 
   document.getElementById('trResconfirm').addEventListener('click', async () => {
     const newDate = document.getElementById('trRescheduleDate').value;
+    const newTime = document.getElementById('trRescheduleTime').value;
     const errEl = document.getElementById('trRescheduleErr');
 
     if (!newDate) {
@@ -415,7 +443,7 @@ function openTreatmentRescheduleModal(rec) {
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ newDate })
+          body: JSON.stringify({ newDate, newTime })
         }
       );
 
@@ -688,4 +716,3 @@ function closeUnfinishedModal() {
   const modal = document.getElementById('unfinishedModal');
   if (modal) modal.classList.add('hidden');
 }
-

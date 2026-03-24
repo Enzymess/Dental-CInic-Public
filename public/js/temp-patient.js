@@ -57,6 +57,7 @@
 
     const data = Object.fromEntries(new FormData(form));
     if (!data.fullName?.trim()) return;
+    if (!data.apptTime) delete data.apptTime; // keep undefined rather than empty string
 
     const submitBtn = form.querySelector('[type="submit"]');
     const origText = submitBtn.textContent;

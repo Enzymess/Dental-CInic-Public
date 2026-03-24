@@ -25,59 +25,30 @@ function applyClinicBranding(cfg) {
 
 async function loadClinicConfig() {
   try {
-    // Use plain fetch (no auth) so branding loads on page open before login
-    // Falls back to authFetch in case the server requires auth
-    let res = await fetch('/clinic-config');
-    if (res.status === 401 || res.status === 403) {
-      const token = sessionStorage.getItem('pdaToken');
-      res = await fetch('/clinic-config', {
-        headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-      });
-    }
+    const res = await fetch('/clinic-config');
     if (!res.ok) throw new Error('Failed to load clinic config');
     window.clinicConfig = await res.json();
   } catch (err) {
     console.warn('Could not load clinic config, using defaults:', err);
     window.clinicConfig = {
       clinic: {
-        name: 'Dental Clinic',
-        logoLetters: 'DC',
-        tagline: '',
-        address: '',
-        phone: '',
-        mobile: '',
-        email: '',
-        website: ''
+        name: 'Dental Clinic', logoLetters: 'DC', tagline: '',
+        address: '', phone: '', mobile: '', email: '', website: ''
       },
       doctor: {
-        name: 'Dr. ',
-        title: 'DMD',
-        licenseNo: '',
-        ptrNo: '',
-        specialization: 'General Dentistry',
-        schedule: ''
+        name: 'Dr. ', title: 'DMD', licenseNo: '', ptrNo: '',
+        specialization: 'General Dentistry', schedule: ''
       },
       print: {
-        footerNote: '',
-        showLogo: true,
-        showDoctorSignatureLine: true,
-        showClinicStampBox: true,
-        primaryColor: '#0b5ea8',
-        accentColor: '#0b9adf'
+        footerNote: '', showLogo: true, showDoctorSignatureLine: true,
+        showClinicStampBox: true, primaryColor: '#0b5ea8', accentColor: '#0b9adf'
       }
     };
   }
-
-  // Apply after DOM is ready (script has defer but call may come before paint)
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => applyClinicBranding(window.clinicConfig));
-  } else {
-    applyClinicBranding(window.clinicConfig);
-  }
+  applyClinicBranding(window.clinicConfig);
 }
 
-// Load branding immediately on script parse — no need to wait for login
-loadClinicConfig();
+// loadClinicConfig() is called from init.js DOMContentLoaded — do not auto-call here
 
 /* ── Clinic Config Editor Modal ───────────────────────────── */
 
